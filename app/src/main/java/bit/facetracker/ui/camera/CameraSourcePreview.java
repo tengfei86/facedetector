@@ -38,6 +38,7 @@ public class CameraSourcePreview extends ViewGroup {
     private CameraSource mCameraSource;
 
     private GraphicOverlay mOverlay;
+    private int mScreenWidth ;
 
     public CameraSourcePreview(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,6 +50,27 @@ public class CameraSourcePreview extends ViewGroup {
         mSurfaceView.getHolder().addCallback(new SurfaceCallback());
         addView(mSurfaceView);
     }
+
+    public void setScreenWidth(int screenWidth) {
+        this.mScreenWidth = screenWidth;
+    }
+
+
+    public CameraSourcePreview(Context context, AttributeSet attrs,int screenWidth) {
+        super(context, attrs);
+        mContext = context;
+        mStartRequested = false;
+        mSurfaceAvailable = false;
+
+        mSurfaceView = new SurfaceView(context);
+        mSurfaceView.getHolder().addCallback(new SurfaceCallback());
+        addView(mSurfaceView);
+
+        this.mScreenWidth = screenWidth;
+    }
+
+
+
 
     public void start(CameraSource cameraSource) throws IOException {
         if (cameraSource == null) {
@@ -107,6 +129,15 @@ public class CameraSourcePreview extends ViewGroup {
             mSurfaceAvailable = true;
             try {
                 startIfReady();
+                Size size = mCameraSource.getPreviewSize();
+                int min = Math.min(size.getWidth(), size.getHeight());
+                int max = Math.max(size.getWidth(), size.getHeight());
+                ViewGroup.LayoutParams layoutParams = getLayoutParams();
+                layoutParams.height = (int) (( mScreenWidth * 1.0 / min ) * max);
+                layoutParams.width = mScreenWidth;
+                setLayoutParams(layoutParams);
+                Log.d("PreviewLayout", "layout_width = " + getWidth() + "layout_height = " + getHeight());
+                Log.d("PreviewLayout", "prieview_width = " + size.getWidth() + "priview_height = " + size.getHeight());
             } catch (IOException e) {
                 Log.e(TAG, "Could not start camera source.", e);
             }

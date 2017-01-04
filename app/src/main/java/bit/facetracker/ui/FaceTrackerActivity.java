@@ -22,12 +22,16 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -38,6 +42,7 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.IOException;
+import java.util.List;
 
 import bit.facetracker.R;
 import bit.facetracker.ui.camera.CameraSourcePreview;
@@ -59,6 +64,9 @@ public final class FaceTrackerActivity extends BaseActivity {
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
+    private int mScreenWidth = 1080;
+
+
     //==============================================================================================
     // Activity Methods
     //==============================================================================================
@@ -70,10 +78,11 @@ public final class FaceTrackerActivity extends BaseActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main);
-
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-
+        Display display = getWindowManager().getDefaultDisplay();
+        mScreenWidth = display.getWidth();
+        mPreview.setScreenWidth(mScreenWidth);
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -82,6 +91,10 @@ public final class FaceTrackerActivity extends BaseActivity {
         } else {
             requestCameraPermission();
         }
+
+//        View decorview = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
+//        decorview.setSystemUiVisibility(uiOptions);
     }
 
     /**
@@ -145,10 +158,27 @@ public final class FaceTrackerActivity extends BaseActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, detector)
-                .setRequestedPreviewSize(640, 480)
+                .setRequestedPreviewSize(1920,1080)
                 .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
+
+        Log.d("NavBar","result = " + hasNavBar(getResources()));
+
+    }
+
+    public boolean hasNavBar (Resources resources)
+    {
+        int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+        return id > 0 && resources.getBoolean(id);
+    }
+
+    public int getNavigationbarHeight(Resources resources) {
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
     }
 
     /**
@@ -157,7 +187,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
+        getPreviewList();
         startCameraSource();
     }
 
@@ -257,6 +287,7 @@ public final class FaceTrackerActivity extends BaseActivity {
                 mCameraSource.release();
                 mCameraSource = null;
             }
+
         }
     }
 
@@ -323,5 +354,16 @@ public final class FaceTrackerActivity extends BaseActivity {
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
         }
+    }
+
+    public void getPreviewList() {
+        Camera camera = Camera.open(0);
+        final Camera.Parameters params = camera.getParameters();
+        final List<Camera.Size> sizes = params.getSupportedPreviewSizes();
+        int length = sizes.size();
+        for(int i  = 0;i < length;i++) {
+           Log.d("PreviewList","height = " + sizes.get(i).height + " width = " + sizes.get(i).width);
+        }
+        camera.release();
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
     android:orientation="vertical"
@@ -8,16 +8,25 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-  <com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview
+  <bit.facetracker.ui.camera.CameraSourcePreview
       android:id="@+id/preview"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
 
-    <com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay
+    <bit.facetracker.ui.camera.GraphicOverlay
         android:id="@+id/faceOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-  </com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview>
+  </bit.facetracker.ui.camera.CameraSourcePreview>
 
-</LinearLayout>
+  <LinearLayout
+      android:background="@mipmap/line_background"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+
+  </LinearLayout>
+
+
+</FrameLayout>
