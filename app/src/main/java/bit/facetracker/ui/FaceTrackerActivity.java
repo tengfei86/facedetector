@@ -16,6 +16,7 @@
 package bit.facetracker.ui;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,30 +24,50 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Detector;
+import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.gms.vision.text.Text;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
+import bit.facetracker.job.FaceDetectorJob;
+import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
 import bit.facetracker.ui.camera.GraphicOverlay;
+import butterknife.Bind;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -66,6 +87,20 @@ public final class FaceTrackerActivity extends BaseActivity {
 
     private int mScreenWidth = 1080;
 
+    public volatile  Bitmap mMarkedBitmap;
+
+    public volatile  boolean mIsGetBitmap;
+
+    private TextView mAttractive;
+    private TextView mAgeView;
+    private TextView mTimeView;
+    private TextView mDayView;
+    private TextView mWeekView;
+    private TextView mTemperatureRangeView;
+    private TextView mTemperatureView;
+    private TextView mConditionView;
+
+    private FrameLayout mFragmeLayout;
 
     //==============================================================================================
     // Activity Methods
@@ -80,6 +115,13 @@ public final class FaceTrackerActivity extends BaseActivity {
         setContentView(R.layout.main);
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
+        mAttractive = (TextView) findViewById(R.id.attractive);
+        mAgeView = (TextView) findViewById(R.id.age);
+
+        // test
+        mAttractive.setText(getString(R.string.displayAttractive,"90"));
+        mAgeView.setText(getString(R.string.displayAge,"30"));
+
         Display display = getWindowManager().getDefaultDisplay();
         mScreenWidth = display.getWidth();
         mPreview.setScreenWidth(mScreenWidth);
@@ -91,6 +133,31 @@ public final class FaceTrackerActivity extends BaseActivity {
         } else {
             requestCameraPermission();
         }
+
+        detecorFace();
+
+
+        mTimeView = (TextView)findViewById(R.id.time);
+        mDayView = (TextView)findViewById(R.id.day);
+        mWeekView = (TextView)findViewById(R.id.week);
+
+        mTemperatureRangeView = (TextView)findViewById(R.id.temperature_range);
+        mTemperatureView = (TextView)findViewById(R.id.temperature);
+        mConditionView = (TextView)findViewById(R.id.condition);
+        Calendar c = Calendar.getInstance();
+        mTimeView.setText(c.get(Calendar.HOUR_OF_DAY) + ":" +  c.get(Calendar.MINUTE));
+        mDayView.setText("公历 " + (c.get(Calendar.MONTH) + 1 )  + "月" +  c.get(Calendar.DAY_OF_MONTH) + "日");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
+        Date d = new Date();
+        String dayOfTheWeek = sdf.format(d);
+        mWeekView.setText(dayOfTheWeek);
+
+        mFragmeLayout = (FrameLayout) findViewById(R.id.topLayout);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout,"alpha",1,0,1);
+        anim.setDuration(5000);
+        anim.start();
+
 
 //        View decorview = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
@@ -141,6 +208,9 @@ public final class FaceTrackerActivity extends BaseActivity {
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .build();
 
+        MyFaceDetector myFaceDetector = new MyFaceDetector(detector);
+
+
         detector.setProcessor(
                 new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
                         .build());
@@ -162,6 +232,7 @@ public final class FaceTrackerActivity extends BaseActivity {
                 .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
+
 
         Log.d("NavBar","result = " + hasNavBar(getResources()));
 
@@ -366,4 +437,83 @@ public final class FaceTrackerActivity extends BaseActivity {
         }
         camera.release();
     }
+
+
+
+
+    public void detecorFace() {
+        FaceDetectorJob job = new FaceDetectorJob();
+        AndroidApplication.getInstance().getJobManager().addJob(job);
+    }
+
+    class MyFaceDetector extends Detector<Face> {
+        private Detector<Face> mDelegate;
+
+        MyFaceDetector(Detector<Face> delegate) {
+            mDelegate = delegate;
+        }
+
+        public SparseArray<Face> detect(Frame frame) {
+            // *** add your custom frame processing code here
+            LogUtils.d("Frame","Frame = " + frame.toString());
+
+
+            return mDelegate.detect(frame);
+        }
+
+        public boolean isOperational() {
+            return mDelegate.isOperational();
+        }
+
+        public boolean setFocus(int id) {
+            return mDelegate.setFocus(id);
+        }
+    }
+
+    class CropPreviewFrame extends AsyncTask<Frame,String,File>{
+
+
+        Face mFace;
+        String filepath;
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param params The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected File doInBackground(Frame... params) {
+            Frame frame = params[0];
+            if (frame != null) {
+                Bitmap bitmap = frame.getBitmap();
+                if (bitmap != null) {
+                    final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)mFace.getPosition().x,(int)mFace.getPosition().y,(int)mFace.getWidth(),(int)mFace.getHeight());
+
+                    File file = new File(filepath);
+                    try {
+                        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+                        disbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                        outputStream.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+
+            return null;
+        }
+    }
+
+
 }
