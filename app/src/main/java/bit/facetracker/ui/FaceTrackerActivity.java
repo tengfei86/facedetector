@@ -25,20 +25,26 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
-import android.view.ViewConfiguration;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
@@ -48,14 +54,19 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.text.Text;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -64,10 +75,11 @@ import java.util.List;
 import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
+import bit.facetracker.model.Result;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
 import bit.facetracker.ui.camera.GraphicOverlay;
-import butterknife.Bind;
+import bit.facetracker.ui.widget.CustomDraweeView;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -84,6 +96,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
+    private static final int RC_HANDLE_EXTERNAL = 3;
 
     private int mScreenWidth = 1080;
 
@@ -100,7 +113,21 @@ public final class FaceTrackerActivity extends BaseActivity {
     private TextView mTemperatureView;
     private TextView mConditionView;
 
-    private FrameLayout mFragmeLayout;
+    private View mFragmeLayout;
+    private volatile Face mFace;
+    private volatile Frame mFrame;
+    private Button mCaptureBtn;
+    private int mFaceId;
+    private static final int MAXOFFSET_X = 20;
+    private static final int MAXOFFSET_Y = 20;
+    private static volatile String CAPTUREPATH = "/sdcard/";
+    private static final int MAXSHOTCOUNT = 15;
+    private int mCount = 0;
+
+    private CustomDraweeView mUserAvatar;
+    private CustomDraweeView mStarAvatar;
+    private SimpleDraweeView mTestView;
+    private TextView mStarName;
 
     //==============================================================================================
     // Activity Methods
@@ -118,9 +145,6 @@ public final class FaceTrackerActivity extends BaseActivity {
         mAttractive = (TextView) findViewById(R.id.attractive);
         mAgeView = (TextView) findViewById(R.id.age);
 
-        // test
-        mAttractive.setText(getString(R.string.displayAttractive,"90"));
-        mAgeView.setText(getString(R.string.displayAge,"30"));
 
         Display display = getWindowManager().getDefaultDisplay();
         mScreenWidth = display.getWidth();
@@ -128,14 +152,13 @@ public final class FaceTrackerActivity extends BaseActivity {
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (rc == PackageManager.PERMISSION_GRANTED) {
+        int ext = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (rc == PackageManager.PERMISSION_GRANTED && ext == PackageManager.PERMISSION_GRANTED) {
             createCameraSource();
         } else {
             requestCameraPermission();
         }
-
-        detecorFace();
-
 
         mTimeView = (TextView)findViewById(R.id.time);
         mDayView = (TextView)findViewById(R.id.day);
@@ -144,6 +167,10 @@ public final class FaceTrackerActivity extends BaseActivity {
         mTemperatureRangeView = (TextView)findViewById(R.id.temperature_range);
         mTemperatureView = (TextView)findViewById(R.id.temperature);
         mConditionView = (TextView)findViewById(R.id.condition);
+
+        mUserAvatar = (CustomDraweeView) findViewById(R.id.self);
+        mStarAvatar = (CustomDraweeView) findViewById(R.id.star);
+
         Calendar c = Calendar.getInstance();
         mTimeView.setText(c.get(Calendar.HOUR_OF_DAY) + ":" +  c.get(Calendar.MINUTE));
         mDayView.setText("公历 " + (c.get(Calendar.MONTH) + 1 )  + "月" +  c.get(Calendar.DAY_OF_MONTH) + "日");
@@ -153,11 +180,19 @@ public final class FaceTrackerActivity extends BaseActivity {
         String dayOfTheWeek = sdf.format(d);
         mWeekView.setText(dayOfTheWeek);
 
-        mFragmeLayout = (FrameLayout) findViewById(R.id.topLayout);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout,"alpha",1,0,1);
-        anim.setDuration(5000);
-        anim.start();
+        mFragmeLayout = findViewById(R.id.topLayout);
+        mStarName = (TextView) findViewById(R.id.star_name);
 
+//        mCaptureBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mIsGetBitmap = true;
+//                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREPATH);
+//                capturetask.execute(mFrame);
+//            }
+//        });
+
+        EventBus.getDefault().register(this);
 
 //        View decorview = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
@@ -172,11 +207,17 @@ public final class FaceTrackerActivity extends BaseActivity {
     private void requestCameraPermission() {
         Log.w(TAG, "Camera permission is not granted. Requesting permission");
 
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+        final String[] permissions = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.CAMERA)) {
             ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+            return;
+        }
+
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_EXTERNAL);
             return;
         }
 
@@ -211,7 +252,7 @@ public final class FaceTrackerActivity extends BaseActivity {
         MyFaceDetector myFaceDetector = new MyFaceDetector(detector);
 
 
-        detector.setProcessor(
+        myFaceDetector.setProcessor(
                 new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
                         .build());
 
@@ -227,9 +268,9 @@ public final class FaceTrackerActivity extends BaseActivity {
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
-        mCameraSource = new CameraSource.Builder(context, detector)
+        mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1920,1080)
-                .setFacing(0)
+                .setFacing(1)
                 .setRequestedFps(30.0f)
                 .build();
 
@@ -258,8 +299,12 @@ public final class FaceTrackerActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getPreviewList();
+//        getPreviewList();
         startCameraSource();
+
+        mIsGetBitmap = false;
+        mCount = 0 ;
+        mFragmeLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -281,6 +326,7 @@ public final class FaceTrackerActivity extends BaseActivity {
         if (mCameraSource != null) {
             mCameraSource.release();
         }
+        EventBus.getDefault().unregister(this);
     }
 
     /**
@@ -358,7 +404,6 @@ public final class FaceTrackerActivity extends BaseActivity {
                 mCameraSource.release();
                 mCameraSource = null;
             }
-
         }
     }
 
@@ -396,6 +441,14 @@ public final class FaceTrackerActivity extends BaseActivity {
         @Override
         public void onNewItem(int faceId, Face item) {
             mFaceGraphic.setId(faceId);
+            mIsGetBitmap = false;
+            mCount = 0 ;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mFragmeLayout.setVisibility(View.GONE);
+                }
+            });
         }
 
         /**
@@ -403,6 +456,23 @@ public final class FaceTrackerActivity extends BaseActivity {
          */
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+            if (!mIsGetBitmap) {
+                mFace = face;
+            }
+
+            if (Math.abs(mFace.getPosition().x - face.getPosition().x) <= MAXOFFSET_X && Math.abs(mFace.getPosition().y - face.getPosition().y) <= MAXOFFSET_Y && !mIsGetBitmap) {
+                mCount ++;
+            }else {
+                mCount = 0;
+            }
+
+            if (mCount >= MAXSHOTCOUNT && !mIsGetBitmap) {
+                mIsGetBitmap = true;
+                CAPTUREPATH = CAPTUREPATH + System.currentTimeMillis() + "capture.png";
+                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREPATH);
+                capturetask.execute(mFrame);
+            }
+
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
         }
@@ -415,6 +485,15 @@ public final class FaceTrackerActivity extends BaseActivity {
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
             mOverlay.remove(mFaceGraphic);
+            mCount = 0;
+            mIsGetBitmap = false;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mFragmeLayout.setVisibility(View.GONE);
+                }
+            });
+
         }
 
         /**
@@ -438,11 +517,8 @@ public final class FaceTrackerActivity extends BaseActivity {
         camera.release();
     }
 
-
-
-
-    public void detecorFace() {
-        FaceDetectorJob job = new FaceDetectorJob();
+    public void detectorface() {
+        FaceDetectorJob job = new FaceDetectorJob(CAPTUREPATH);
         AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
@@ -455,9 +531,9 @@ public final class FaceTrackerActivity extends BaseActivity {
 
         public SparseArray<Face> detect(Frame frame) {
             // *** add your custom frame processing code here
-            LogUtils.d("Frame","Frame = " + frame.toString());
-
-
+            if (!mIsGetBitmap) {
+                mFrame = frame;
+            }
             return mDelegate.detect(frame);
         }
 
@@ -470,11 +546,14 @@ public final class FaceTrackerActivity extends BaseActivity {
         }
     }
 
-    class CropPreviewFrame extends AsyncTask<Frame,String,File>{
+    class CropPreviewFrame extends AsyncTask<Frame,String,File> {
 
-
-        Face mFace;
         String filepath;
+
+        public CropPreviewFrame(String filepath) {
+            this.filepath = filepath;
+        }
+
         /**
          * Override this method to perform a computation on a background thread. The
          * specified parameters are the parameters passed to {@link #execute}
@@ -492,16 +571,43 @@ public final class FaceTrackerActivity extends BaseActivity {
         @Override
         protected File doInBackground(Frame... params) {
             Frame frame = params[0];
+            File file = null;
             if (frame != null) {
-                Bitmap bitmap = frame.getBitmap();
+                Bitmap bitmap = getBitmap(frame);
                 if (bitmap != null) {
-                    final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)mFace.getPosition().x,(int)mFace.getPosition().y,(int)mFace.getWidth(),(int)mFace.getHeight());
 
-                    File file = new File(filepath);
+                    double x = Math.max(0,mFace.getPosition().x);
+                    double y = Math.max(0,mFace.getPosition().y);
+
+                    double w = mFace.getWidth();
+                    double h = mFace.getHeight();
+
+                    if (mFace.getPosition().x < 0) {
+                        w += mFace.getPosition().x;
+                        if ((w + x) > bitmap.getWidth()) {
+                            w = bitmap.getWidth() - x;
+                        }
+                    }
+
+                    if (mFace.getPosition().y < 0) {
+                        h += mFace.getPosition().y;
+                        if ((h + y) > bitmap.getHeight()) {
+                            h = bitmap.getHeight() - y;
+                        }
+                    }
+
+                    final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)x,(int)y,(int)w,(int)h);
+
+                    LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
+
+                    LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
+
+                    file = new File(filepath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
                         disbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
                         outputStream.close();
+                        detectorface();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -509,11 +615,43 @@ public final class FaceTrackerActivity extends BaseActivity {
                     }
                 }
             }
+            return file;
+        }
 
 
-            return null;
+        private Bitmap getBitmap(Frame frame) {
+            ByteBuffer byteBuffer = frame.getGrayscaleImageData();
+            byte[] bytes = byteBuffer.array();
+            int w = frame.getMetadata().getWidth();
+            int h = frame.getMetadata().getHeight();
+
+            YuvImage yuvimage=new YuvImage(bytes, ImageFormat.NV21, w, h, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
+            byte[] jpegArray = baos.toByteArray();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);
+
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+            return disbitmap;
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(Result result) {
+        if (result != null) {
+            mFragmeLayout.setVisibility(View.VISIBLE);
+            mAttractive.setText(getString(R.string.displayAttractive,result.attributes.attractive));
+            mAgeView.setText(getString(R.string.displayAge,result.attributes.age));
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
+            anim.setDuration(1000);
+            anim.start();
+            mStarName.setText(getString(R.string.displayStarName,result.name));
+            mUserAvatar.setCircleImageURI("file://" + CAPTUREPATH);
+            mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
+        }
+    }
 
 }

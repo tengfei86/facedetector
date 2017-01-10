@@ -140,7 +140,7 @@
     <string name="rain">Rain</string>
     <string name="temperature">Temperature</string>
     <string name="action_graphs">Graphs</string>
-    <string name="displayAttractive">颜值: %1$s</string>
-    <string name="displayAge">潮龄: %1$s</string>
-
+    <string name="displayAttractive">颜值: %1$d</string>
+    <string name="displayAge">潮龄: %1$d</string>
+    <string name="displayStarName">撞脸明星: %1$s</string>
 </resources>

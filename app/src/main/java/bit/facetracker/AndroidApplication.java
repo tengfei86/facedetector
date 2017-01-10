@@ -34,7 +34,7 @@ public class AndroidApplication extends Application {
 
     private void initFresco() {
         ImagePipelineConfig config =  FrescoOkHttpImagePipelineConfigFactory.newBuilder(sInstance, HttpUtils.getHttpClient()).build();
-        Fresco.initialize(sInstance,config);
+        Fresco.initialize(sInstance);
     }
 
     @Nullable

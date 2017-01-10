@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout
-    android:id="@+id/topLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
     android:orientation="vertical">
+
+
 
     <bit.facetracker.ui.camera.CameraSourcePreview
         android:id="@+id/preview"
@@ -18,10 +19,10 @@
             android:id="@+id/faceOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-
     </bit.facetracker.ui.camera.CameraSourcePreview>
 
     <LinearLayout
+        android:id="@+id/topLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@mipmap/bg"
@@ -149,7 +150,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         fresco:actualImageScaleType="centerCrop"
-                        fresco:placeholderImage="@mipmap/bill"
                         fresco:roundAsCircle="true"
                         />
                 </RelativeLayout>
@@ -182,24 +182,37 @@
 
             </RelativeLayout>
 
-
             <LinearLayout
-                android:layout_width="150dp"
-                android:layout_height="150dp"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+            <TextView
+                android:textColor="@color/displayTextColor"
+                android:textSize="@dimen/textSize"
+                android:gravity="center"
+                android:id="@+id/star_name"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:background="@mipmap/star_background"
-                android:padding="25dp"
-                >
+                android:padding="25dp">
 
                 <bit.facetracker.ui.widget.CustomDraweeView
                     android:id="@+id/star"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     fresco:actualImageScaleType="centerCrop"
-                    fresco:placeholderImage="@mipmap/bill"
                     fresco:roundAsCircle="true"
                     />
+            </LinearLayout>
+
             </LinearLayout>
 
         </RelativeLayout>
