@@ -16,6 +16,8 @@
 package bit.facetracker.ui;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,12 +36,14 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
+import android.view.animation.AnimationSet;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -114,6 +118,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     private TextView mConditionView;
 
     private View mFragmeLayout;
+    private View mWearSubPanel;
     private volatile Face mFace;
     private volatile Frame mFrame;
     private Button mCaptureBtn;
@@ -126,12 +131,18 @@ public final class FaceTrackerActivity extends BaseActivity {
 
     private CustomDraweeView mUserAvatar;
     private CustomDraweeView mStarAvatar;
-    private SimpleDraweeView mTestView;
     private TextView mStarName;
 
     //==============================================================================================
     // Activity Methods
     //==============================================================================================
+
+    CustomDraweeView mWearMainImgView;
+    CustomDraweeView mWearOneImgView;
+    CustomDraweeView mWearTwoImgView;
+    CustomDraweeView mWearThreeImgView;
+    private Handler mHandler;
+    private View mResultPanel;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -183,17 +194,13 @@ public final class FaceTrackerActivity extends BaseActivity {
         mFragmeLayout = findViewById(R.id.topLayout);
         mStarName = (TextView) findViewById(R.id.star_name);
 
-//        mCaptureBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mIsGetBitmap = true;
-//                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREPATH);
-//                capturetask.execute(mFrame);
-//            }
-//        });
-
+        mWearMainImgView = (CustomDraweeView)findViewById(R.id.img_main);
+        mWearOneImgView = (CustomDraweeView)findViewById(R.id.img_one);
+        mWearTwoImgView = (CustomDraweeView)findViewById(R.id.img_two);
+        mWearThreeImgView = (CustomDraweeView)findViewById(R.id.img_three);
+        mWearSubPanel = findViewById(R.id.wear_panel);
         EventBus.getDefault().register(this);
-
+        mHandler = new Handler();
 //        View decorview = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
 //        decorview.setSystemUiVisibility(uiOptions);
@@ -469,6 +476,7 @@ public final class FaceTrackerActivity extends BaseActivity {
             if (mCount >= MAXSHOTCOUNT && !mIsGetBitmap) {
                 mIsGetBitmap = true;
                 CAPTUREPATH = CAPTUREPATH + System.currentTimeMillis() + "capture.png";
+                LogUtils.d("Count","got it");
                 CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREPATH);
                 capturetask.execute(mFrame);
             }
@@ -643,14 +651,59 @@ public final class FaceTrackerActivity extends BaseActivity {
     public void onEvent(Result result) {
         if (result != null) {
             mFragmeLayout.setVisibility(View.VISIBLE);
+            mWearSubPanel.setAlpha(0f);
+            mResultPanel.setAlpha(1f);
+            mResultPanel = findViewById(R.id.result_panel);
             mAttractive.setText(getString(R.string.displayAttractive,result.attributes.attractive));
             mAgeView.setText(getString(R.string.displayAge,result.attributes.age));
+
             ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
             anim.setDuration(1000);
             anim.start();
+
+            AnimatorSet set = new AnimatorSet();
+
+            ObjectAnimator animWear = ObjectAnimator.ofFloat(mWearSubPanel, "alpha", 0, 1);
+
+            ObjectAnimator resultFade = ObjectAnimator.ofFloat(mResultPanel, "alpha", 1, 0);
+
+            set.setDuration(1000);
+
+
+
+            anim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            set.playTogether(animWear,resultFade);
+                            set.start();
+                        }
+                    }, 5000);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+
+
             mStarName.setText(getString(R.string.displayStarName,result.name));
             mUserAvatar.setCircleImageURI("file://" + CAPTUREPATH);
             mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
+
         }
     }
 

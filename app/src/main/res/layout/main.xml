@@ -8,8 +8,6 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-
-
     <bit.facetracker.ui.camera.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
@@ -116,11 +114,14 @@
             </LinearLayout>
 
         </LinearLayout>
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1"
+            android:layout_weight="1">
+        <RelativeLayout
+            android:id="@+id/result_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@mipmap/line_background">
 
             <RelativeLayout
@@ -215,6 +216,90 @@
 
             </LinearLayout>
 
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/wear_panel"
+            android:background="@mipmap/wear_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_margin="60dp"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <bit.facetracker.ui.widget.CustomDraweeView
+                    android:id="@+id/img_main"
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="1"
+                    />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp">
+
+                    <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:actualImageScaleType="centerCrop"
+                        android:background="@mipmap/small_linebg_normal"
+                        android:id="@+id/img_one"
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        />
+
+                    <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:actualImageScaleType="centerCrop"
+                        android:background="@mipmap/small_linebg_normal"
+                        android:id="@+id/img_two"
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        />
+
+                    <RelativeLayout
+                        android:orientation="vertical"
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <bit.facetracker.ui.widget.CustomDraweeView
+                            android:id="@+id/img_three"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            fresco:actualImageScaleType="centerCrop"
+                            fresco:roundAsCircle="true"
+                            />
+                        <ImageView
+                            android:background="@mipmap/small_linebg_special"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
+
+        </RelativeLayout>
         </RelativeLayout>
 
     </LinearLayout>
