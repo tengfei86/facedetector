@@ -19,6 +19,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -33,7 +34,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,12 +43,9 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
-import android.view.animation.AnimationSet;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
@@ -79,7 +76,9 @@ import java.util.List;
 import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
+import bit.facetracker.job.WearJob;
 import bit.facetracker.model.Result;
+import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
 import bit.facetracker.ui.camera.GraphicOverlay;
@@ -118,14 +117,14 @@ public final class FaceTrackerActivity extends BaseActivity {
     private TextView mConditionView;
 
     private View mFragmeLayout;
-    private View mWearSubPanel;
     private volatile Face mFace;
     private volatile Frame mFrame;
     private Button mCaptureBtn;
     private int mFaceId;
     private static final int MAXOFFSET_X = 20;
     private static final int MAXOFFSET_Y = 20;
-    private static volatile String CAPTUREPATH = "/sdcard/";
+    private static volatile String CAPTUREPATHDIR = "/sdcard/pics/";
+    private static volatile String CAPTUREIMGPATH = "";
     private static final int MAXSHOTCOUNT = 15;
     private int mCount = 0;
 
@@ -137,12 +136,31 @@ public final class FaceTrackerActivity extends BaseActivity {
     // Activity Methods
     //==============================================================================================
 
+    View mWearSubPanel1;
     CustomDraweeView mWearMainImgView;
     CustomDraweeView mWearOneImgView;
     CustomDraweeView mWearTwoImgView;
     CustomDraweeView mWearThreeImgView;
+
+    View mWearSubPanel2;
+    CustomDraweeView mWearMainImgView1;
+    CustomDraweeView mWearOneImgView1;
+    CustomDraweeView mWearTwoImgView1;
+    CustomDraweeView mWearThreeImgView1;
+
+    View mWearSubPanel3;
+    CustomDraweeView mWearMainImgView2;
+    CustomDraweeView mWearOneImgView2;
+    CustomDraweeView mWearTwoImgView2;
+    CustomDraweeView mWearThreeImgView2;
+
     private Handler mHandler;
     private View mResultPanel;
+    private View mWearPanel;
+    private AnimatorSet mWearpanelAnimationSet = new AnimatorSet();
+    private ObjectAnimator animator1;
+    private ObjectAnimator animator2;
+    private ObjectAnimator animator3;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -194,13 +212,99 @@ public final class FaceTrackerActivity extends BaseActivity {
         mFragmeLayout = findViewById(R.id.topLayout);
         mStarName = (TextView) findViewById(R.id.star_name);
 
-        mWearMainImgView = (CustomDraweeView)findViewById(R.id.img_main);
-        mWearOneImgView = (CustomDraweeView)findViewById(R.id.img_one);
-        mWearTwoImgView = (CustomDraweeView)findViewById(R.id.img_two);
-        mWearThreeImgView = (CustomDraweeView)findViewById(R.id.img_three);
-        mWearSubPanel = findViewById(R.id.wear_panel);
+
         EventBus.getDefault().register(this);
         mHandler = new Handler();
+        mResultPanel = findViewById(R.id.result_panel);
+        mWearPanel = findViewById(R.id.wear_panel);
+        initWearView();
+
+        animator1 = new ObjectAnimator().ofFloat(mWearSubPanel1, "alpha", 0, 1);
+        animator2 = new ObjectAnimator().ofFloat(mWearSubPanel2, "alpha", 0, 1);
+        animator3 = new ObjectAnimator().ofFloat(mWearSubPanel3, "alpha", 0, 1);
+
+        mWearSubPanel1.setAlpha(0f);
+        mWearSubPanel2.setAlpha(0f);
+        mWearSubPanel3.setAlpha(0f);
+
+        animator1.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWearSubPanel1.setAlpha(0f);
+                mWearSubPanel2.setAlpha(0f);
+                mWearSubPanel3.setAlpha(0f);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                LogUtils.d("Count","animator1");
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+
+        animator2.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWearSubPanel1.setAlpha(0f);
+                mWearSubPanel2.setAlpha(0f);
+                mWearSubPanel3.setAlpha(0f);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                LogUtils.d("Count","animator2");
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+
+        animator3.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWearSubPanel1.setAlpha(0f);
+                mWearSubPanel2.setAlpha(0f);
+                mWearSubPanel3.setAlpha(0f);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                LogUtils.d("Count","animator3");
+                mWearpanelAnimationSet.start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+
+        mWearpanelAnimationSet.setDuration(1000);
+
 //        View decorview = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
 //        decorview.setSystemUiVisibility(uiOptions);
@@ -277,7 +381,7 @@ public final class FaceTrackerActivity extends BaseActivity {
 
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1920,1080)
-                .setFacing(1)
+                .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
 
@@ -454,6 +558,10 @@ public final class FaceTrackerActivity extends BaseActivity {
                 @Override
                 public void run() {
                     mFragmeLayout.setVisibility(View.GONE);
+                    mWearSubPanel1.setAlpha(0f);
+                    mWearSubPanel2.setAlpha(0f);
+                    mWearSubPanel3.setAlpha(0f);
+                    mWearpanelAnimationSet.end();
                 }
             });
         }
@@ -475,9 +583,9 @@ public final class FaceTrackerActivity extends BaseActivity {
 
             if (mCount >= MAXSHOTCOUNT && !mIsGetBitmap) {
                 mIsGetBitmap = true;
-                CAPTUREPATH = CAPTUREPATH + System.currentTimeMillis() + "capture.png";
+                CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
                 LogUtils.d("Count","got it");
-                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREPATH);
+                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
                 capturetask.execute(mFrame);
             }
 
@@ -499,6 +607,10 @@ public final class FaceTrackerActivity extends BaseActivity {
                 @Override
                 public void run() {
                     mFragmeLayout.setVisibility(View.GONE);
+                    mWearSubPanel1.setAlpha(0f);
+                    mWearSubPanel2.setAlpha(0f);
+                    mWearSubPanel3.setAlpha(0f);
+                    mWearpanelAnimationSet.end();
                 }
             });
 
@@ -525,8 +637,8 @@ public final class FaceTrackerActivity extends BaseActivity {
         camera.release();
     }
 
-    public void detectorface() {
-        FaceDetectorJob job = new FaceDetectorJob(CAPTUREPATH);
+    public void detectorface(String path) {
+        FaceDetectorJob job = new FaceDetectorJob(path);
         AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
@@ -592,16 +704,18 @@ public final class FaceTrackerActivity extends BaseActivity {
 
                     if (mFace.getPosition().x < 0) {
                         w += mFace.getPosition().x;
-                        if ((w + x) > bitmap.getWidth()) {
-                            w = bitmap.getWidth() - x;
-                        }
+                    }
+
+                    if ((w + x) > bitmap.getWidth()) {
+                        w = bitmap.getWidth() - x;
                     }
 
                     if (mFace.getPosition().y < 0) {
                         h += mFace.getPosition().y;
-                        if ((h + y) > bitmap.getHeight()) {
-                            h = bitmap.getHeight() - y;
-                        }
+                    }
+
+                    if ((h + y) > bitmap.getHeight()) {
+                        h = bitmap.getHeight() - y;
                     }
 
                     final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)x,(int)y,(int)w,(int)h);
@@ -609,13 +723,16 @@ public final class FaceTrackerActivity extends BaseActivity {
                     LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
 
                     LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
+                    File dir = new File(CAPTUREPATHDIR);
+                    if (!dir.exists()) {
+                        dir.mkdir();
+                    }
 
                     file = new File(filepath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
                         disbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
                         outputStream.close();
-                        detectorface();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -626,6 +743,11 @@ public final class FaceTrackerActivity extends BaseActivity {
             return file;
         }
 
+        @Override
+        protected void onPostExecute(File file) {
+            super.onPostExecute(file);
+            detectorface(file.getAbsolutePath());
+        }
 
         private Bitmap getBitmap(Frame frame) {
             ByteBuffer byteBuffer = frame.getGrayscaleImageData();
@@ -650,25 +772,23 @@ public final class FaceTrackerActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(Result result) {
         if (result != null) {
+
             mFragmeLayout.setVisibility(View.VISIBLE);
-            mWearSubPanel.setAlpha(0f);
+            mResultPanel.setVisibility(View.VISIBLE);
             mResultPanel.setAlpha(1f);
-            mResultPanel = findViewById(R.id.result_panel);
+            mWearPanel.setVisibility(View.GONE);
+
             mAttractive.setText(getString(R.string.displayAttractive,result.attributes.attractive));
             mAgeView.setText(getString(R.string.displayAge,result.attributes.age));
+
+
+            mStarName.setText(getString(R.string.displayStarName,result.name));
+            mUserAvatar.setCircleImageURI("file://" + CAPTUREIMGPATH);
+            mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
 
             ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
             anim.setDuration(1000);
             anim.start();
-
-            AnimatorSet set = new AnimatorSet();
-
-            ObjectAnimator animWear = ObjectAnimator.ofFloat(mWearSubPanel, "alpha", 0, 1);
-
-            ObjectAnimator resultFade = ObjectAnimator.ofFloat(mResultPanel, "alpha", 1, 0);
-
-            set.setDuration(1000);
-
 
 
             anim.addListener(new Animator.AnimatorListener() {
@@ -679,13 +799,10 @@ public final class FaceTrackerActivity extends BaseActivity {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            set.playTogether(animWear,resultFade);
-                            set.start();
-                        }
-                    }, 5000);
+
+                    WearJob wearJob = new WearJob();
+                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
+
                 }
 
                 @Override
@@ -700,11 +817,112 @@ public final class FaceTrackerActivity extends BaseActivity {
             });
 
 
-            mStarName.setText(getString(R.string.displayStarName,result.name));
-            mUserAvatar.setCircleImageURI("file://" + CAPTUREPATH);
-            mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
-
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WearResult wearResult) {
+        if (wearResult != null && wearResult.code.equals("200")) {
+            mWearpanelAnimationSet = new AnimatorSet();
+            mWearpanelAnimationSet.setDuration(2000);
+
+            if (wearResult.result != null && wearResult.result.size() > 0) {
+
+                int size = wearResult.result.size();
+                if (size == 1) {
+                    mWearMainImgView.setImageURI( wearResult.result.get(0).MainImg);
+                    mWearOneImgView.setImageURI(wearResult.result.get(0).ImgOne);
+                    mWearTwoImgView.setImageURI(wearResult.result.get(0).ImgTwo);
+                    mWearThreeImgView.setImageURI(wearResult.result.get(0).ImgThree);
+
+                    mWearpanelAnimationSet.playSequentially(animator1);
+
+                } else if (size == 2) {
+                    mWearMainImgView.setImageURI( wearResult.result.get(0).MainImg);
+                    mWearOneImgView.setImageURI(wearResult.result.get(0).ImgOne);
+                    mWearTwoImgView.setImageURI(wearResult.result.get(0).ImgTwo);
+                    mWearThreeImgView.setImageURI(wearResult.result.get(0).ImgThree);
+
+                    mWearMainImgView1.setImageURI( wearResult.result.get(1).MainImg);
+                    mWearOneImgView1.setImageURI(wearResult.result.get(1).ImgOne);
+                    mWearTwoImgView1.setImageURI(wearResult.result.get(1).ImgTwo);
+                    mWearThreeImgView1.setImageURI(wearResult.result.get(1).ImgThree);
+
+                    mWearpanelAnimationSet.playSequentially(animator1,animator2);
+                } else if(size == 3) {
+                    mWearMainImgView.setImageURI( wearResult.result.get(0).MainImg);
+                    mWearOneImgView.setImageURI(wearResult.result.get(0).ImgOne);
+                    mWearTwoImgView.setImageURI(wearResult.result.get(0).ImgTwo);
+                    mWearThreeImgView.setImageURI(wearResult.result.get(0).ImgThree);
+
+                    mWearMainImgView1.setImageURI( wearResult.result.get(1).MainImg);
+                    mWearOneImgView1.setImageURI(wearResult.result.get(1).ImgOne);
+                    mWearTwoImgView1.setImageURI(wearResult.result.get(1).ImgTwo);
+                    mWearThreeImgView1.setImageURI(wearResult.result.get(1).ImgThree);
+
+                    mWearMainImgView2.setImageURI( wearResult.result.get(2).MainImg);
+                    mWearOneImgView2.setImageURI(wearResult.result.get(2).ImgOne);
+                    mWearTwoImgView2.setImageURI(wearResult.result.get(2).ImgTwo);
+                    mWearThreeImgView2.setImageURI(wearResult.result.get(2).ImgThree);
+                    mWearpanelAnimationSet.playSequentially(animator1,animator2,animator3);
+                }
+
+                AnimatorSet set = new AnimatorSet();
+                ObjectAnimator animWear = ObjectAnimator.ofFloat(mWearPanel, "alpha", 0, 1);
+                ObjectAnimator animResult = ObjectAnimator.ofFloat(mResultPanel, "alpha", 1, 0);
+                mResultPanel.setVisibility(View.GONE);
+                mWearPanel.setVisibility(View.VISIBLE);
+                set.playTogether(animWear, animResult);
+                set.start();
+
+                animWear.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+
+                        mWearpanelAnimationSet.start();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+
+
+
+            }
+        }
+
+    }
+
+    public void initWearView() {
+        mWearMainImgView = (CustomDraweeView)findViewById(R.id.img_main);
+        mWearOneImgView = (CustomDraweeView)findViewById(R.id.img_one);
+        mWearTwoImgView = (CustomDraweeView)findViewById(R.id.img_two);
+        mWearThreeImgView = (CustomDraweeView)findViewById(R.id.img_three);
+        mWearSubPanel1 = findViewById(R.id.wear_subpanel1);
+
+        mWearMainImgView1 = (CustomDraweeView)findViewById(R.id.img_main1);
+        mWearOneImgView1 = (CustomDraweeView)findViewById(R.id.img_one1);
+        mWearTwoImgView1 = (CustomDraweeView)findViewById(R.id.img_two1);
+        mWearThreeImgView1 = (CustomDraweeView)findViewById(R.id.img_three1);
+        mWearSubPanel2 = findViewById(R.id.wear_subpanel2);
+
+        mWearMainImgView2 = (CustomDraweeView)findViewById(R.id.img_main2);
+        mWearOneImgView2 = (CustomDraweeView)findViewById(R.id.img_one2);
+        mWearTwoImgView2 = (CustomDraweeView)findViewById(R.id.img_two2);
+        mWearThreeImgView2 = (CustomDraweeView)findViewById(R.id.img_three2);
+        mWearSubPanel3 = findViewById(R.id.wear_subpanel3);
     }
 
 }
