@@ -201,7 +201,8 @@ public final class FaceTrackerActivity extends BaseActivity {
         mStarAvatar = (CustomDraweeView) findViewById(R.id.star);
 
         Calendar c = Calendar.getInstance();
-        mTimeView.setText(c.get(Calendar.HOUR_OF_DAY) + ":" +  c.get(Calendar.MINUTE));
+
+        mTimeView.setText(c.get(Calendar.HOUR_OF_DAY) + ":" +  ((c.get(Calendar.MINUTE) <= 9) ? "0" + c.get(Calendar.MINUTE) : "" + c.get(Calendar.MINUTE)));
         mDayView.setText("公历 " + (c.get(Calendar.MONTH) + 1 )  + "月" +  c.get(Calendar.DAY_OF_MONTH) + "日");
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
@@ -287,8 +288,15 @@ public final class FaceTrackerActivity extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+
                 LogUtils.d("Count","animator3");
-                mWearpanelAnimationSet.start();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mIsGetBitmap)
+                        mWearpanelAnimationSet.start();
+                    }
+                });
             }
 
             @Override
@@ -303,7 +311,7 @@ public final class FaceTrackerActivity extends BaseActivity {
         });
 
 
-        mWearpanelAnimationSet.setDuration(1000);
+//        mWearpanelAnimationSet.setDuration(1000);
 
 //        View decorview = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
@@ -384,7 +392,6 @@ public final class FaceTrackerActivity extends BaseActivity {
                 .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
-
 
         Log.d("NavBar","result = " + hasNavBar(getResources()));
 
@@ -557,11 +564,11 @@ public final class FaceTrackerActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mWearpanelAnimationSet.end();
                     mFragmeLayout.setVisibility(View.GONE);
                     mWearSubPanel1.setAlpha(0f);
                     mWearSubPanel2.setAlpha(0f);
                     mWearSubPanel3.setAlpha(0f);
-                    mWearpanelAnimationSet.end();
                 }
             });
         }
@@ -606,11 +613,11 @@ public final class FaceTrackerActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mWearpanelAnimationSet.end();
                     mFragmeLayout.setVisibility(View.GONE);
                     mWearSubPanel1.setAlpha(0f);
                     mWearSubPanel2.setAlpha(0f);
                     mWearSubPanel3.setAlpha(0f);
-                    mWearpanelAnimationSet.end();
                 }
             });
 
@@ -787,7 +794,7 @@ public final class FaceTrackerActivity extends BaseActivity {
             mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
 
             ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
-            anim.setDuration(1000);
+            anim.setDuration(1500);
             anim.start();
 
 
@@ -800,8 +807,24 @@ public final class FaceTrackerActivity extends BaseActivity {
                 @Override
                 public void onAnimationEnd(Animator animation) {
 
-                    WearJob wearJob = new WearJob();
-                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (result.attributes.expression.size() > 1) {
+                                int gender = 0;
+                                if(result.attributes.expression.get(0).probability < result.attributes.expression.get(1).probability) {
+                                    gender = 1;
+                                }
+                                WearJob wearJob = new WearJob(gender);
+                                AndroidApplication.getInstance().getJobManager().addJob(wearJob);
+                            }else {
+                                WearJob wearJob = new WearJob();
+                                AndroidApplication.getInstance().getJobManager().addJob(wearJob);
+                            }
+                        }
+                    }, 3000);
+
 
                 }
 
@@ -823,8 +846,9 @@ public final class FaceTrackerActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WearResult wearResult) {
         if (wearResult != null && wearResult.code.equals("200")) {
-            mWearpanelAnimationSet = new AnimatorSet();
-            mWearpanelAnimationSet.setDuration(2000);
+//            mWearpanelAnimationSet = new AnimatorSet();
+            mWearpanelAnimationSet.end();
+            mWearpanelAnimationSet.setDuration(4000);
 
             if (wearResult.result != null && wearResult.result.size() > 0) {
 

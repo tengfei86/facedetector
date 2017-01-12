@@ -3,7 +3,10 @@ package bit.facetracker.job;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import bit.facetracker.constant.RequestParamers;
 import bit.facetracker.constant.URL;
 import bit.facetracker.model.Result;
 import bit.facetracker.model.WearResult;
@@ -17,6 +20,13 @@ import bit.facetracker.tools.LogUtils;
 
 public class WearJob extends BaseJob {
 
+    // 0 female 1 male
+    public int gender;
+
+    public WearJob(int gender) {
+        this.gender = gender;
+    }
+
     public WearJob() {
 
     }
@@ -24,7 +34,9 @@ public class WearJob extends BaseJob {
     @Override
     public void onRun() throws Throwable {
         super.onRun();
-        String result = HttpUtils.getInstance().post(URL.WEARRESULT, null, null);
+        Map<String, String> params = new HashMap<>();
+        params.put(RequestParamers.WearRecommend.GENDER, String.valueOf(gender));
+        String result = HttpUtils.getInstance().post(URL.WEARRESULT, null, params);
         WearResult resultObj = GsonUtils.fromJson(result, WearResult.class);
         EventBus.getDefault().post(resultObj);
         LogUtils.d("WearResult", "result = "  + result);

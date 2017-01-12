@@ -227,7 +227,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel1"
-                android:layout_margin="100dp"
+                android:layout_marginLeft="100dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginBottom="100dp"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -263,25 +266,14 @@
                         android:layout_weight="1"
                         />
 
-                    <RelativeLayout
-                        android:orientation="vertical"
+                    <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:actualImageScaleType="centerCrop"
+                        android:background="@mipmap/small_linebg_normal"
+                        android:id="@+id/img_three"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-                        <bit.facetracker.ui.widget.CustomDraweeView
-                            android:id="@+id/img_three"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            fresco:actualImageScaleType="centerCrop"
-                            fresco:roundAsCircle="true"
-                            />
-                        <ImageView
-                            android:background="@mipmap/small_linebg_special"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
-
-                    </RelativeLayout>
+                        android:layout_weight="1"
+                        />
 
                 </LinearLayout>
 
@@ -289,7 +281,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel2"
-                android:layout_margin="100dp"
+                android:layout_marginLeft="100dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginBottom="100dp"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -325,25 +320,14 @@
                         android:layout_weight="1"
                         />
 
-                    <RelativeLayout
-                        android:orientation="vertical"
+                    <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:actualImageScaleType="centerCrop"
+                        android:background="@mipmap/small_linebg_normal"
+                        android:id="@+id/img_three1"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-                        <bit.facetracker.ui.widget.CustomDraweeView
-                            android:id="@+id/img_three1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            fresco:actualImageScaleType="centerCrop"
-                            fresco:roundAsCircle="true"
-                            />
-                        <ImageView
-                            android:background="@mipmap/small_linebg_special"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
-
-                    </RelativeLayout>
+                        android:layout_weight="1"
+                        />
 
                 </LinearLayout>
 
@@ -351,7 +335,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel3"
-                android:layout_margin="100dp"
+                android:layout_marginLeft="100dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginBottom="100dp"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -387,25 +374,16 @@
                         android:layout_weight="1"
                         />
 
-                    <RelativeLayout
-                        android:orientation="vertical"
+
+                    <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:actualImageScaleType="centerCrop"
+                        android:background="@mipmap/small_linebg_normal"
+                        android:id="@+id/img_three2"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        />
 
-                        <bit.facetracker.ui.widget.CustomDraweeView
-                            android:id="@+id/img_three2"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            fresco:actualImageScaleType="centerCrop"
-                            fresco:roundAsCircle="true"
-                            />
-                        <ImageView
-                            android:background="@mipmap/small_linebg_special"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
-
-                    </RelativeLayout>
 
                 </LinearLayout>
 

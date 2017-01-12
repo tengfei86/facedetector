@@ -18,8 +18,16 @@ public class Result implements Serializable{
         public List<Expresstion> expression;
 
         public class Expresstion implements Serializable {
+
             public String kind;
             public Double probability;
+            public List<Gender> gender;
+
+            public class Gender {
+                public String kind;
+                public double probability;
+            }
+
         }
     }
 
