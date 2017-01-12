@@ -17,6 +17,7 @@ package bit.facetracker.ui;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -37,6 +38,7 @@ import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -161,6 +163,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     private ObjectAnimator animator1;
     private ObjectAnimator animator2;
     private ObjectAnimator animator3;
+    boolean mIsAnimationend ;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -213,9 +216,20 @@ public final class FaceTrackerActivity extends BaseActivity {
         mFragmeLayout = findViewById(R.id.topLayout);
         mStarName = (TextView) findViewById(R.id.star_name);
 
-
         EventBus.getDefault().register(this);
-        mHandler = new Handler();
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+
+                if (msg.what == 0) {
+                    if(mIsGetBitmap) {
+                        LogUtils.d("Count", "restart set");
+                        mWearpanelAnimationSet.start();
+                    }
+                }
+            }
+        };
         mResultPanel = findViewById(R.id.result_panel);
         mWearPanel = findViewById(R.id.wear_panel);
         initWearView();
@@ -231,6 +245,7 @@ public final class FaceTrackerActivity extends BaseActivity {
         animator1.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
+
                 mWearSubPanel1.setAlpha(0f);
                 mWearSubPanel2.setAlpha(0f);
                 mWearSubPanel3.setAlpha(0f);
@@ -288,15 +303,9 @@ public final class FaceTrackerActivity extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-
                 LogUtils.d("Count","animator3");
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mIsGetBitmap)
-                        mWearpanelAnimationSet.start();
-                    }
-                });
+                mIsAnimationend = true;
+//                mHandler.sendEmptyMessage(0);
             }
 
             @Override
@@ -310,6 +319,24 @@ public final class FaceTrackerActivity extends BaseActivity {
             }
         });
 
+
+
+//        mWearpanelAnimationSet.addListener(new AnimatorListenerAdapter() {
+//            /**
+//             * {@inheritDoc}
+//             *
+//             * @param animation
+//             */
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                super.onAnimationEnd(animation);
+//                LogUtils.d("Count","onAnimationEnd Set");
+//                if(mIsGetBitmap) {
+//                    mWearpanelAnimationSet.end();
+//                    mWearpanelAnimationSet.start();
+//                }
+//            }
+//        });
 
 //        mWearpanelAnimationSet.setDuration(1000);
 
@@ -811,9 +838,9 @@ public final class FaceTrackerActivity extends BaseActivity {
                         @Override
                         public void run() {
 
-                            if (result.attributes.expression.size() > 1) {
+                            if (result.attributes.gender.size() > 1) {
                                 int gender = 0;
-                                if(result.attributes.expression.get(0).probability < result.attributes.expression.get(1).probability) {
+                                if(result.attributes.gender.get(0).probability < result.attributes.gender.get(1).probability) {
                                     gender = 1;
                                 }
                                 WearJob wearJob = new WearJob(gender);
@@ -907,8 +934,9 @@ public final class FaceTrackerActivity extends BaseActivity {
 
                     @Override
                     public void onAnimationEnd(Animator animation) {
-
+                        mIsAnimationend = false;
                         mWearpanelAnimationSet.start();
+                        new Thread(new Alarm()).start();
                     }
 
                     @Override
@@ -948,5 +976,34 @@ public final class FaceTrackerActivity extends BaseActivity {
         mWearThreeImgView2 = (CustomDraweeView)findViewById(R.id.img_three2);
         mWearSubPanel3 = findViewById(R.id.wear_subpanel3);
     }
+    class Alarm implements Runnable {
+
+        /**
+         * When an object implementing interface <code>Runnable</code> is used
+         * to create a thread, starting the thread causes the object's
+         * <code>run</code> method to be called in that separately executing
+         * thread.
+         * <p>
+         * The general contract of the method <code>run</code> is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+            while (mIsGetBitmap) {
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mIsAnimationend) {
+                    mHandler.sendEmptyMessage(0);
+                    mIsAnimationend = false;
+                }
+            }
+        }
+    }
+
 
 }
