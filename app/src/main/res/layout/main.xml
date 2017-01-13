@@ -134,8 +134,8 @@
                     android:layout_height="120dp"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="30dp"
                     android:background="@mipmap/fan"/>
 
 
@@ -157,8 +157,8 @@
                 </RelativeLayout>
 
                 <TextView
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginRight="50dp"
                     android:gravity="center_vertical|right"
                     android:textColor="@color/displayTextColor"
                     android:textSize="@dimen/textSize"
@@ -170,8 +170,8 @@
                     android:layout_height="120dp"/>
 
                 <TextView
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginRight="50dp"
                     android:gravity="center_vertical|right"
                     android:textColor="@color/displayTextColor"
                     android:textSize="@dimen/textSize"
@@ -200,6 +200,7 @@
                 android:layout_height="50dp" />
 
             <LinearLayout
+                android:layout_marginBottom="100dp"
                 android:orientation="vertical"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
@@ -241,6 +242,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0px"
                     android:layout_weight="1"
+                    fresco:placeholderImage="@mipmap/noimg"
                     />
 
                 <LinearLayout
@@ -249,6 +251,8 @@
                     android:layout_height="120dp">
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_one"
@@ -258,6 +262,8 @@
                         />
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_two"
@@ -267,6 +273,8 @@
                         />
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_three"
@@ -291,6 +299,8 @@
                 android:layout_height="match_parent">
 
                 <bit.facetracker.ui.widget.CustomDraweeView
+                    fresco:placeholderImage="@mipmap/noimg"
+                    fresco:placeholderImageScaleType="fitCenter"
                     android:id="@+id/img_main1"
                     android:layout_width="match_parent"
                     android:layout_height="0px"
@@ -303,6 +313,8 @@
                     android:layout_height="120dp">
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_one1"
@@ -312,6 +324,8 @@
                         />
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_two1"
@@ -321,6 +335,8 @@
                         />
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_three1"
@@ -345,6 +361,8 @@
                 android:layout_height="match_parent">
 
                 <bit.facetracker.ui.widget.CustomDraweeView
+                    fresco:placeholderImage="@mipmap/noimg"
+                    fresco:placeholderImageScaleType="fitCenter"
                     android:id="@+id/img_main2"
                     android:layout_width="match_parent"
                     android:layout_height="0px"
@@ -357,6 +375,8 @@
                     android:layout_height="120dp">
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_one2"
@@ -366,6 +386,8 @@
                         />
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_two2"
@@ -376,6 +398,8 @@
 
 
                     <bit.facetracker.ui.widget.CustomDraweeView
+                        fresco:placeholderImage="@mipmap/noimg"
+                        fresco:placeholderImageScaleType="fitCenter"
                         fresco:actualImageScaleType="centerCrop"
                         android:background="@mipmap/small_linebg_normal"
                         android:id="@+id/img_three2"

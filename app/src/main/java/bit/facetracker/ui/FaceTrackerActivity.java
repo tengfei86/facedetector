@@ -17,10 +17,8 @@ package bit.facetracker.ui;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -82,6 +80,7 @@ import bit.facetracker.job.WearJob;
 import bit.facetracker.model.Result;
 import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.LogUtils;
+import bit.facetracker.tools.ToastUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
 import bit.facetracker.ui.camera.GraphicOverlay;
 import bit.facetracker.ui.widget.CustomDraweeView;
@@ -320,8 +319,19 @@ public final class FaceTrackerActivity extends BaseActivity {
             }
         });
 
-
-
+        // delete cache files
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                File file = new File(CAPTUREIMGPATH);
+//                if (file.exists() && file.isDirectory()) {
+//                   File[]  allfiles =  file.listFiles();
+//                   for(int i = 0; i < allfiles.length;i++) {
+//                       allfiles[i].delete();
+//                   }
+//                }
+//            }
+//        }).start();
 //        mWearpanelAnimationSet.addListener(new AnimatorListenerAdapter() {
 //            /**
 //             * {@inheritDoc}
@@ -817,64 +827,69 @@ public final class FaceTrackerActivity extends BaseActivity {
     public void onEvent(Result result) {
         if (result != null && mIsGetBitmap) {
 
-            mFragmeLayout.setVisibility(View.VISIBLE);
-            mResultPanel.setVisibility(View.VISIBLE);
-            mResultPanel.setAlpha(1f);
-            mWearPanel.setVisibility(View.GONE);
+            if (result.face_num > 0) {
+                mFragmeLayout.setVisibility(View.VISIBLE);
+                mResultPanel.setVisibility(View.VISIBLE);
+                mResultPanel.setAlpha(1f);
+                mWearPanel.setVisibility(View.GONE);
 
-            mAttractive.setText(getString(R.string.displayAttractive,result.attributes.attractive));
-            mAgeView.setText(getString(R.string.displayAge,result.attributes.age));
-
-
-            mStarName.setText(getString(R.string.displayStarName,result.name));
-            mUserAvatar.setCircleImageURI("file://" + CAPTUREIMGPATH);
-            mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
-
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
-            anim.setDuration(1500);
-            anim.start();
+                mAttractive.setText(getString(R.string.displayAttractive,result.attributes.attractive));
+                mAgeView.setText(getString(R.string.displayAge,result.attributes.age));
 
 
-            anim.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
+                mStarName.setText(getString(R.string.displayStarName,result.name));
+                mUserAvatar.setCircleImageURI("file://" + CAPTUREIMGPATH);
+                mStarAvatar.setCircleImageURI(result.cel_image.thumbnail);
 
-                }
+                ObjectAnimator anim = ObjectAnimator.ofFloat(mFragmeLayout, "alpha", 0, 1);
+                anim.setDuration(1500);
+                anim.start();
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
 
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
+                anim.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
 
-                            if (result.attributes.gender.size() > 1) {
-                                int gender = 0;
-                                if(result.attributes.gender.get(0).probability < result.attributes.gender.get(1).probability) {
-                                    gender = 1;
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (result.attributes.gender.size() > 1) {
+                                    int gender = 0;
+                                    if(result.attributes.gender.get(0).probability < result.attributes.gender.get(1).probability) {
+                                        gender = 1;
+                                    }
+                                    WearJob wearJob = new WearJob(gender);
+                                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
+                                }else {
+                                    WearJob wearJob = new WearJob();
+                                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
                                 }
-                                WearJob wearJob = new WearJob(gender);
-                                AndroidApplication.getInstance().getJobManager().addJob(wearJob);
-                            }else {
-                                WearJob wearJob = new WearJob();
-                                AndroidApplication.getInstance().getJobManager().addJob(wearJob);
                             }
-                        }
-                    }, 3000);
+                        }, 3000);
 
 
-                }
+                    }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
 
-                }
+                    }
 
-                @Override
-                public void onAnimationRepeat(Animator animation) {
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
 
-                }
-            });
+                    }
+                });
+
+            } else {
+                ToastUtils.showLong(this,"抱歉，没有检测到人脸区域 O(∩_∩)O");
+            }
 
 
         }

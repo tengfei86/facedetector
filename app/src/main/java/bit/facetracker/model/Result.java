@@ -11,6 +11,7 @@ public class Result implements Serializable{
     public Attribute attributes;
     public String name;
     public CellImage cel_image;
+    public int face_num;
 
     public class Attribute implements Serializable {
         public int age;
