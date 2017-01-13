@@ -121,10 +121,10 @@ public final class FaceTrackerActivity extends BaseActivity {
     private View mFragmeLayout;
     private volatile Face mFace;
     private volatile Frame mFrame;
+    private volatile int mFaceId;
     private Button mCaptureBtn;
-    private int mFaceId;
-    private static final int MAXOFFSET_X = 20;
-    private static final int MAXOFFSET_Y = 20;
+    private static final int MAXOFFSET_X = 5;
+    private static final int MAXOFFSET_Y = 5;
     private static volatile String CAPTUREPATHDIR = "/sdcard/pics/";
     private static volatile String CAPTUREIMGPATH = "";
     private static final int MAXSHOTCOUNT = 15;
@@ -225,6 +225,7 @@ public final class FaceTrackerActivity extends BaseActivity {
                 if (msg.what == 0) {
                     if(mIsGetBitmap) {
                         LogUtils.d("Count", "restart set");
+                        mWearpanelAnimationSet.end();
                         mWearpanelAnimationSet.start();
                     }
                 }
@@ -416,6 +417,7 @@ public final class FaceTrackerActivity extends BaseActivity {
 
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1920,1080)
+                .setAutoFocusEnabled(true)
                 .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
@@ -588,10 +590,13 @@ public final class FaceTrackerActivity extends BaseActivity {
             mFaceGraphic.setId(faceId);
             mIsGetBitmap = false;
             mCount = 0 ;
+            mFaceId = faceId;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    LogUtils.d("Count","onNewItem");
                     mWearpanelAnimationSet.end();
+                    LogUtils.d("Count","onNewItem = " + faceId);
                     mFragmeLayout.setVisibility(View.GONE);
                     mWearSubPanel1.setAlpha(0f);
                     mWearSubPanel2.setAlpha(0f);
@@ -608,6 +613,8 @@ public final class FaceTrackerActivity extends BaseActivity {
             if (!mIsGetBitmap) {
                 mFace = face;
             }
+
+            LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
 
             if (Math.abs(mFace.getPosition().x - face.getPosition().x) <= MAXOFFSET_X && Math.abs(mFace.getPosition().y - face.getPosition().y) <= MAXOFFSET_Y && !mIsGetBitmap) {
                 mCount ++;
@@ -640,6 +647,9 @@ public final class FaceTrackerActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    LogUtils.d("Count","onMissing");
+                    SparseArray<Face> faces = detectionResults.getDetectedItems();
+//                    LogUtils.d("Count","onMissingface size = " + detectionResults.getDetectedItems().get(mFaceId).getId());
                     mWearpanelAnimationSet.end();
                     mFragmeLayout.setVisibility(View.GONE);
                     mWearSubPanel1.setAlpha(0f);
@@ -805,7 +815,7 @@ public final class FaceTrackerActivity extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(Result result) {
-        if (result != null) {
+        if (result != null && mIsGetBitmap) {
 
             mFragmeLayout.setVisibility(View.VISIBLE);
             mResultPanel.setVisibility(View.VISIBLE);
@@ -872,9 +882,9 @@ public final class FaceTrackerActivity extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WearResult wearResult) {
-        if (wearResult != null && wearResult.code.equals("200")) {
-//            mWearpanelAnimationSet = new AnimatorSet();
+        if (wearResult != null && wearResult.code.equals("200") && mIsGetBitmap) {
             mWearpanelAnimationSet.end();
+            mWearpanelAnimationSet = new AnimatorSet();
             mWearpanelAnimationSet.setDuration(4000);
 
             if (wearResult.result != null && wearResult.result.size() > 0) {
