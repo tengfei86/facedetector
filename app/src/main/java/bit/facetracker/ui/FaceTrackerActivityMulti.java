@@ -166,8 +166,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
     private ObjectAnimator animator3;
     boolean mIsAnimationend ;
 
-    public Map<Integer, Face> mDetectedFaces = new HashMap<>();
-
+    public Map<Integer, FaceContainer> mDetectedFaces = new HashMap<>();
 
     public Face mCurrentGotFace = null;
 
@@ -436,7 +435,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
                 .setRequestedPreviewSize(1920,1080)
                 .setAutoFocusEnabled(true)
                 .setFacing(1)
-                .setRequestedFps(20.0f)
+                .setRequestedFps(15.0f)
                 .build();
 
         Log.d("NavBar","result = " + hasNavBar(getResources()));
@@ -606,24 +605,10 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         public void onNewItem(int faceId, Face item) {
 
             //TODO  split face
-
-
+            FaceContainer container = new FaceContainer(item);
+            mDetectedFaces.put(faceId, container);
             mFaceGraphic.setId(faceId);
-            mIsGetBitmap = false;
-            mCount = 0 ;
-            mFaceId = faceId;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    LogUtils.d("Count","onNewItem");
-                    mWearpanelAnimationSet.end();
-                    LogUtils.d("Count","onNewItem = " + faceId);
-                    mFragmeLayout.setVisibility(View.GONE);
-                    mWearSubPanel1.setAlpha(0f);
-                    mWearSubPanel2.setAlpha(0f);
-                    mWearSubPanel3.setAlpha(0f);
-                }
-            });
+
         }
 
         /**
@@ -634,37 +619,42 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
 
             // Split Face
 
-
-            float currentX  = (float)(face.getPosition().x + face.getWidth() / 2.0);
-            float currentY  = (float)(face.getPosition().y + face.getHeight() / 2.0);
-
-            float lastX = 0f;
-            float lastY = 0f;
-
-            if (mFace != null) {
-                lastX = (float) (mFace.getPosition().x + mFace.getWidth() / 2.0);
-                lastY  = (float)(mFace.getPosition().y + mFace.getHeight() / 2.0);
-            }
-
-
-            if (Math.abs(currentX - lastX) <= MAXOFFSET_X && Math.abs(currentY - lastY) <= MAXOFFSET_Y && !mIsGetBitmap && mFace != null) {
-                mCount ++;
-            } else {
-                mCount = 0;
-            }
-
             if (!mIsGetBitmap) {
-                if(mFace != null)
-                LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
-                mFace = face;
-            }
 
-            if (mCount >= MAXSHOTCOUNT && !mIsGetBitmap) {
-                mIsGetBitmap = true;
-                CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
-                LogUtils.d("Count","got it");
-                CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
-                capturetask.execute(mFrame);
+                float currentX  = (float)(face.getPosition().x + face.getWidth() / 2.0);
+                float currentY  = (float)(face.getPosition().y + face.getHeight() / 2.0);
+
+                float lastX = 0f;
+                float lastY = 0f;
+
+                mFace = mDetectedFaces.get(face.getId()).face;
+
+                if (mFace != null) {
+                    lastX = (float) (mFace.getPosition().x + mFace.getWidth() / 2.0);
+                    lastY  = (float)(mFace.getPosition().y + mFace.getHeight() / 2.0);
+                }
+
+                if(mFace != null) {
+                    LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
+                }
+
+                if (Math.abs(currentX - lastX) <= MAXOFFSET_X && Math.abs(currentY - lastY) <= MAXOFFSET_Y && !mIsGetBitmap && mFace != null) {
+                    mDetectedFaces.get(face.getId()).count++;
+                } else {
+                    mDetectedFaces.get(face.getId()).count = 0;
+                }
+
+                // update face
+                mDetectedFaces.get(face.getId()).face = face;
+
+                if (mDetectedFaces.get(face.getId()).count >= MAXSHOTCOUNT) {
+                    mCurrentGotFace = face;
+                    mIsGetBitmap = true;
+                    CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
+                    LogUtils.d("Count","got it");
+                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
+                    capturetask.execute(mFrame);
+                }
             }
 
             mOverlay.add(mFaceGraphic);
@@ -678,26 +668,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-
-            // TODO split face
-
             mOverlay.remove(mFaceGraphic);
-            mCount = 0;
-            mIsGetBitmap = false;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    LogUtils.d("Count","onMissing");
-                    SparseArray<Face> faces = detectionResults.getDetectedItems();
-//                    LogUtils.d("Count","onMissingface size = " + detectionResults.getDetectedItems().get(mFaceId).getId());
-                    mWearpanelAnimationSet.end();
-                    mFragmeLayout.setVisibility(View.GONE);
-                    mWearSubPanel1.setAlpha(0f);
-                    mWearSubPanel2.setAlpha(0f);
-                    mWearSubPanel3.setAlpha(0f);
-                }
-            });
-
         }
 
         /**
@@ -707,7 +678,25 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         @Override
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
+
+            if (mIsGetBitmap) {
+                mIsGetBitmap = false;
+                mCurrentGotFace = null;
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        mWearpanelAnimationSet.end();
+                        mFragmeLayout.setVisibility(View.GONE);
+                        mWearSubPanel1.setAlpha(0f);
+                        mWearSubPanel2.setAlpha(0f);
+                        mWearSubPanel3.setAlpha(0f);
+                    }
+                });
+            }
+
         }
+
     }
 
     public void getPreviewList() {
@@ -1058,6 +1047,16 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
                 }
             }
         }
+    }
+
+    class FaceContainer {
+
+        FaceContainer(Face face) {
+            this.face = face;
+        }
+
+        Face face  = null;
+        int count  = 0;
     }
 
 
