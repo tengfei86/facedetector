@@ -229,10 +229,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel1"
-                android:layout_marginLeft="100dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="100dp"
-                android:layout_marginBottom="100dp"
+                android:layout_marginLeft="200px"
+                android:layout_marginRight="200px"
+                android:layout_marginTop="200px"
+                android:layout_marginBottom="150px"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -290,10 +290,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel2"
-                android:layout_marginLeft="100dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="100dp"
-                android:layout_marginBottom="100dp"
+                android:layout_marginLeft="200px"
+                android:layout_marginRight="200px"
+                android:layout_marginTop="200px"
+                android:layout_marginBottom="150px"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -352,10 +352,10 @@
 
             <LinearLayout
                 android:id="@+id/wear_subpanel3"
-                android:layout_marginLeft="100dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="100dp"
-                android:layout_marginBottom="100dp"
+                android:layout_marginLeft="200px"
+                android:layout_marginRight="200px"
+                android:layout_marginTop="200px"
+                android:layout_marginBottom="150px"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -416,8 +416,8 @@
 
             <ImageView
                 android:src="@mipmap/wear_rightcorner"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="300px"
+                android:layout_height="300px"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"/>

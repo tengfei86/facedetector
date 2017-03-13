@@ -182,6 +182,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         mAttractive = (TextView) findViewById(R.id.attractive);
         mAgeView = (TextView) findViewById(R.id.age);
 
+        LogUtils.e("AndroidRuntime","dpi ="  + getResources().getDisplayMetrics().densityDpi);
 
         Display display = getWindowManager().getDefaultDisplay();
         mScreenWidth = display.getWidth();
@@ -434,7 +435,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1920,1080)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
+                .setFacing(0)
                 .setRequestedFps(15.0f)
                 .build();
 
