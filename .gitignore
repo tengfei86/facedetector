@@ -29,6 +29,7 @@ local.properties
 *.log
 .idea/*
 build/*
+captures/
  
 # OS-specific files
 .DS_Store
