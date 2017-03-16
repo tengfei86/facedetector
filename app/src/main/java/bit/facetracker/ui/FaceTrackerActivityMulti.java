@@ -592,11 +592,11 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
      */
     private class GraphicFaceTracker extends Tracker<Face> {
         private GraphicOverlay mOverlay;
-        private FaceGraphic mFaceGraphic;
+        private FaceGraphicNew mFaceGraphic;
 
         GraphicFaceTracker(GraphicOverlay overlay) {
             mOverlay = overlay;
-            mFaceGraphic = new FaceGraphic(overlay);
+            mFaceGraphic = new FaceGraphicNew(overlay);
         }
 
         /**
