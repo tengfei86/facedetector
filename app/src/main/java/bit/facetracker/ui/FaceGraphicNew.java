@@ -27,6 +27,7 @@ import android.graphics.RectF;
 import com.google.android.gms.vision.face.Face;
 
 import bit.facetracker.R;
+import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.GraphicOverlay;
 
 /**
@@ -41,9 +42,9 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     private static final float BOX_STROKE_WIDTH = 5.0f;
 
     private float progress = 0.0f;
-    private float rectBand = 10.0f;
+    private float rectBand = 50.0f;
 
-    private float OFFSET = (float)(1.0 / 16);
+    private float OFFSET = (float)(1.0 / 8);
 
     private static final int COLOR_CHOICES[] = {
         Color.BLUE,
@@ -74,20 +75,9 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     FaceGraphicNew(GraphicOverlay overlay) {
         super(overlay);
 
-        mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
-        final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
-
-        mFacePositionPaint = new Paint();
-        mFacePositionPaint.setColor(Color.WHITE);
-
-        mIdPaint = new Paint();
-        mIdPaint.setColor(selectedColor);
-        mIdPaint.setTextSize(ID_TEXT_SIZE);
-
         mBoxPaint = new Paint();
-        mBoxPaint.setColor(selectedColor);
-        mBoxPaint.setStyle(Paint.Style.STROKE);
-        mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+        mBoxPaint.setColor(Color.WHITE);
+        mBoxPaint.setStyle(Paint.Style.FILL);
 
         mFocusBitmap = BitmapFactory.decodeResource(overlay.getResources(), R.mipmap.focus);
     }
@@ -128,8 +118,9 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     }
 
     private void updateProgress() {
+        LogUtils.d("Graphic","progress = " + progress);
         progress += OFFSET;
-        if(progress > 100.0) {
+        if(progress > 1.0) {
             progress = 0.0f;
         }
     }
@@ -137,6 +128,7 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     private void initStartDrawPoint(float centerX,float centerY,float xOffset,float yOffset) {
         for(int i = 0; i < startDrawPoint.length;i++) {
             PointF point = startDrawPoint[i];
+            LogUtils.d("Graphic","i = " + i + "x = " + point.x + " y = " + point.y);
             if (i == 0) {
                 float x = centerX - xOffset / 2;
                 float y = centerY - yOffset;
@@ -164,7 +156,6 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
         float progressY = yOffset * progress;
 
         for(int i = 0; i < startDrawPoint.length;i++) {
-
             if (i == 0) {
                 commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + progressX,startDrawPoint[i].y + rectBand);
             } else if (i == 1) {
@@ -174,6 +165,7 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
             } else {
                 commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + rectBand,startDrawPoint[i].y + progressY);
             }
+            canvas.drawRect(commonRectF,paint);
         }
     }
 

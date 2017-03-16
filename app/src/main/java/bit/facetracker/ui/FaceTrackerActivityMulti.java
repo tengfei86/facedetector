@@ -436,7 +436,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
                 .setRequestedPreviewSize(1920,1080)
                 .setAutoFocusEnabled(true)
                 .setFacing(1)
-                .setRequestedFps(15.0f)
+                .setRequestedFps(30.0f)
                 .build();
 
         Log.d("NavBar","result = " + hasNavBar(getResources()));
