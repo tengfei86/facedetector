@@ -410,7 +410,10 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
-                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
+                .setMode(FaceDetector.FAST_MODE)
+                .setProminentFaceOnly(true)
+                .setLandmarkType(FaceDetector.NO_LANDMARKS)
                 .build();
 
         MyFaceDetector myFaceDetector = new MyFaceDetector(detector);
