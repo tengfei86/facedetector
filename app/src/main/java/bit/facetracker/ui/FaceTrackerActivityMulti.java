@@ -433,9 +433,9 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
-                .setRequestedPreviewSize(1920,1080)
+                .setRequestedPreviewSize(1280,720)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
+                .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
 
@@ -615,10 +615,14 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         /**
          * Update the position/characteristics of the face within the overlay.
          */
+
+        long timestamp = System.currentTimeMillis();
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
 
             // Split Face
+            LogUtils.d("onUpdate","time = " + (System.currentTimeMillis() - timestamp));
+            timestamp = System.currentTimeMillis();
 
             if (!mIsGetBitmap) {
 

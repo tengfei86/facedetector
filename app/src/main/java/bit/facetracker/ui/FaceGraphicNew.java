@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.provider.Settings;
 
 import com.google.android.gms.vision.face.Face;
 
@@ -42,7 +43,7 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     private static final float BOX_STROKE_WIDTH = 5.0f;
 
     private float progress = 0.0f;
-    private float rectBand = 50.0f;
+    private float rectBand = 10.0f;
 
     private float OFFSET = (float)(1.0 / 8);
 
@@ -114,7 +115,7 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
         float xOffset = scaleX(face.getWidth() / 2.0f);
         float yOffset = scaleY(face.getHeight() / 2.0f);
         initStartDrawPoint(x, y, xOffset, yOffset);
-        drawRect(canvas, mBoxPaint, xOffset, yOffset);
+        drawRect(canvas, mBoxPaint, xOffset, yOffset,x, y);
     }
 
     private void updateProgress() {
@@ -126,6 +127,10 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
     }
 
     private void initStartDrawPoint(float centerX,float centerY,float xOffset,float yOffset) {
+
+        float progressX = xOffset * progress;
+        float progressY = yOffset * progress;
+
         for(int i = 0; i < startDrawPoint.length;i++) {
             PointF point = startDrawPoint[i];
             LogUtils.d("Graphic","i = " + i + "x = " + point.x + " y = " + point.y);
@@ -138,19 +143,22 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
                 float y = centerY - yOffset / 2;
                 point.set(x,y);
             } else if (i == 2) {
-                float x = centerX - xOffset / 2;
+                float x = centerX + xOffset / 2 - progressX;
                 float y = centerY + yOffset  - rectBand;
                 point.set(x,y);
             } else {
                 float x = centerX - xOffset ;
-                float y = centerY - yOffset / 2 ;
+                float y = centerY + yOffset / 2 - progressY ;
                 point.set(x,y);
             }
 
         }
     }
+    long lasttime = System.currentTimeMillis();
+    private void drawRect(Canvas canvas,Paint paint,float xOffset,float yOffset,float centerX,float centerY) {
 
-    private void drawRect(Canvas canvas,Paint paint,float xOffset,float yOffset) {
+        LogUtils.d("Draw","time = " + (System.currentTimeMillis() - lasttime));
+        lasttime = System.currentTimeMillis();
 
         float progressX = xOffset * progress;
         float progressY = yOffset * progress;
@@ -161,9 +169,9 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
             } else if (i == 1) {
                 commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + rectBand,startDrawPoint[i].y + progressY);
             } else if (i == 2) {
-                commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + progressX,startDrawPoint[i].y + rectBand);
+                commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,centerX + xOffset / 2,startDrawPoint[i].y + rectBand);
             } else {
-                commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + rectBand,startDrawPoint[i].y + progressY);
+                commonRectF.set(startDrawPoint[i].x,startDrawPoint[i].y,startDrawPoint[i].x + rectBand,centerY + yOffset / 2);
             }
             canvas.drawRect(commonRectF,paint);
         }
