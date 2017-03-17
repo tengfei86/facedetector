@@ -72,8 +72,10 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
 
     private RectF commonRectF = new RectF();
 
-    // 0 step one | 1 step two | 2 step 3 | 3 step 4
+    // 0 step one | 1 step two | 2 step 3
     private int type = 0;
+    private float haftWidth;
+    private float halfHeight;
 
     FaceGraphicNew(GraphicOverlay overlay) {
         super(overlay);
@@ -113,13 +115,18 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getPosition().x + face.getWidth() / 2);
         float y = translateY(face.getPosition().y + face.getHeight() / 2);
-        float xOffset = scaleX(face.getWidth() / 2.0f);
-        float yOffset = scaleY(face.getHeight() / 2.0f);
+
+        haftWidth = scaleX(face.getWidth() / 2.0f);
+        halfHeight = scaleY(face.getHeight() / 2.0f);
+
+        float xOffset = scaleX(face.getWidth() * 2 / 3.0f);
+        float yOffset = scaleY(face.getHeight() * 2 / 3.0f);
+
         initStartDrawPoint(x, y, xOffset, yOffset);
         drawRect(canvas, mBoxPaint, xOffset, yOffset,x, y);
 
-        if (type == 0 || type == 3) {
-            type = ++type % 4;
+        if (type == 0 ) {
+            type = ++type % 3;
         }
 
     }
@@ -129,7 +136,7 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
         progress += OFFSET;
         if(progress > 1.0) {
             progress = 0.0f;
-            type = ++type % 4 ;
+            type = ++type % 3 ;
         }
     }
 
@@ -144,42 +151,41 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
                 LogUtils.d("Graphic","i = " + i + "x = " + point.x + " y = " + point.y);
                 if (i == 0) {
                     float x = centerX - xOffset / 2;
-                    float y = centerY - yOffset;
+                    float y = centerY - halfHeight;
                     point.set(x,y);
                 } else if (i == 1) {
-                    float x = centerX + xOffset  - rectBand;
+                    float x = centerX + haftWidth  - rectBand;
                     float y = centerY - yOffset / 2;
                     point.set(x,y);
                 } else if (i == 2) {
                     float x = centerX + xOffset / 2 - progressX;
-                    float y = centerY + yOffset  - rectBand;
+                    float y = centerY + halfHeight  - rectBand;
                     point.set(x,y);
                 } else {
-                    float x = centerX - xOffset ;
+                    float x = centerX - haftWidth ;
                     float y = centerY + yOffset / 2 - progressY ;
                     point.set(x,y);
                 }
 
             }
         } else if (type == 2) {
-            // TODO
             for(int i = 0; i < startDrawPoint.length;i++) {
                 PointF point = startDrawPoint[i];
                 LogUtils.d("Graphic","i = " + i + "x = " + point.x + " y = " + point.y);
                 if (i == 0) {
                     float x = centerX - xOffset / 2 + progressX;
-                    float y = centerY - yOffset;
+                    float y = centerY - halfHeight;
                     point.set(x,y);
                 } else if (i == 1) {
-                    float x = centerX + xOffset  - rectBand;
+                    float x = centerX + haftWidth  - rectBand;
                     float y = centerY - yOffset / 2 + progressY;
                     point.set(x,y);
                 } else if (i == 2) {
                     float x = centerX - xOffset / 2 ;
-                    float y = centerY + yOffset  - rectBand;
+                    float y = centerY + halfHeight  - rectBand;
                     point.set(x,y);
                 } else {
-                    float x = centerX - xOffset ;
+                    float x = centerX - haftWidth ;
                     float y = centerY - yOffset / 2 ;
                     point.set(x,y);
                 }
@@ -233,13 +239,13 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
 
             for(int i = 0; i < 4;i++) {
                 if (i == 0) {
-                    commonRectF.set(centerX - xOffset,centerY - yOffset,centerX - xOffset + rectBand,centerY - yOffset + rectBand);
+                    commonRectF.set(centerX - haftWidth,centerY - halfHeight,centerX - haftWidth + rectBand,centerY - halfHeight + rectBand);
                 } else if (i == 1) {
-                    commonRectF.set(centerX + xOffset - rectBand,centerY - yOffset,centerX + xOffset,centerY - yOffset + rectBand);
+                    commonRectF.set(centerX + haftWidth - rectBand,centerY - halfHeight,centerX + haftWidth,centerY - halfHeight + rectBand);
                 } else if (i == 2) {
-                    commonRectF.set(centerX + xOffset - rectBand,centerY + yOffset - rectBand,centerX + xOffset,centerY + yOffset);
+                    commonRectF.set(centerX + haftWidth - rectBand,centerY + halfHeight - rectBand,centerX + haftWidth,centerY + halfHeight);
                 } else {
-                    commonRectF.set(centerX - xOffset,centerY + yOffset - rectBand,centerX - xOffset + rectBand,centerY + yOffset);
+                    commonRectF.set(centerX - haftWidth,centerY + halfHeight - rectBand,centerX - haftWidth + rectBand,centerY + halfHeight);
                 }
                 canvas.drawRect(commonRectF,paint);
             }
