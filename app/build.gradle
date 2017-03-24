@@ -90,5 +90,6 @@ dependencies {
     compile 'com.birbit:android-priority-jobqueue:2.0.1'
     compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.airbnb.android:lottie:1.5.3'
 
 }

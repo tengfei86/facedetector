@@ -410,10 +410,9 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
-                .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
-                .setMode(FaceDetector.FAST_MODE)
+                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                .setMode(FaceDetector.ACCURATE_MODE)
                 .setProminentFaceOnly(true)
-                .setLandmarkType(FaceDetector.NO_LANDMARKS)
                 .build();
 
         MyFaceDetector myFaceDetector = new MyFaceDetector(detector);
@@ -438,7 +437,7 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1280,720)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
+                .setFacing(0)
                 .setRequestedFps(30.0f)
                 .build();
 
