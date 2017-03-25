@@ -1,5 +1,6 @@
 package bit.facetracker.ui.widget;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
+
+import bit.facetracker.tools.LogUtils;
 
 /**
  * Created by blade on 23/03/2017.
@@ -58,10 +61,33 @@ public class TextContainer extends LinearLayout {
         }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0.0f, (float) (TIMEOFFSET * PERCENT * getChildCount() - 1) + TIMEOFFSET);
-        animator.setDuration(1000);
+        animator.setDuration(500);
 
         CustomListAnimatorListener listAnimatorListener = new CustomListAnimatorListener(getChildCount(), TIMEOFFSET);
         animator.addUpdateListener(listAnimatorListener);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (getChildCount() > 0 && ((FlashTextView) getChildAt(getChildCount() - 1)).getRectAlpha() > 0) {
+                    ((FlashTextView) getChildAt(getChildCount() - 1)).setRectAlpha(0);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         animator.start();
 
     }
@@ -95,8 +121,13 @@ public class TextContainer extends LinearLayout {
             int start = (int) (((float) animation.getAnimatedValue() - timeoffset) / (PERCENT * timeoffset));
 
             for (int i = Math.min(count - 1, Math.max(start, 0)); i < count; i++) {
-                if ((float) animation.getAnimatedValue() <= (i * timeoffset * PERCENT + timeoffset) && getChildAt(i).getVisibility() == VISIBLE) {
+                if ((float) animation.getAnimatedValue() <= (i * timeoffset * PERCENT + timeoffset) && getChildAt(i).getVisibility() == VISIBLE && ((FlashTextView) getChildAt(i)).getRectAlpha() > 0) {
                     int alpha = (int) ((1 - ((float) animation.getAnimatedValue() - i * timeoffset * PERCENT) / timeoffset) * 255);
+
+                    int pre = i - 1;
+                    if (pre >= 0 && ((FlashTextView) getChildAt(pre)).getRectAlpha() > 0) {
+                        ((FlashTextView) getChildAt(pre)).setRectAlpha(0);
+                    }
                     ((FlashTextView) getChildAt(i)).setRectAlpha(alpha);
                 }
                 if ((float) animation.getAnimatedValue() >= ((i * timeoffset * PERCENT))) {
@@ -106,6 +137,7 @@ public class TextContainer extends LinearLayout {
                 }
             }
         }
+
     }
 
 

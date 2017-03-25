@@ -143,4 +143,9 @@
     <string name="displayAttractive">颜值: %1$d</string>
     <string name="displayAge">潮龄: %1$d</string>
     <string name="displayStarName">撞脸明星: %1$s</string>
+
+    <string name="label_displayattractive">颜值</string>
+    <string name="label_displayage">潮龄</string>
+    <string name="label_displaycharm">魅力</string>
+
 </resources>

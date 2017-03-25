@@ -358,9 +358,9 @@ public final class FaceTrackerActivityMulti extends BaseActivity {
 
 //        mWearpanelAnimationSet.setDuration(1000);
 
-//        View decorview = getWindow().getDecorView();
-//        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
-//        decorview.setSystemUiVisibility(uiOptions);
+        View decorview = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE ;
+        decorview.setSystemUiVisibility(uiOptions);
     }
 
     /**

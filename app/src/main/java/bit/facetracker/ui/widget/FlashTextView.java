@@ -45,6 +45,7 @@ public class FlashTextView extends android.support.v7.widget.AppCompatTextView {
         mTextPaint.density = context.getResources().getDisplayMetrics().density;
         mTextPaint.setStyle(Paint.Style.FILL);
         mTextPaint.setTextSize(getTextSize());
+        mTextPaint.setColor(Color.WHITE);
         mRectPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mRectPaint.setColor(Color.WHITE);
         mRectPaint.setStyle(Paint.Style.FILL);
@@ -62,9 +63,7 @@ public class FlashTextView extends android.support.v7.widget.AppCompatTextView {
         final int left = getLeft();
         final int bottom = getBottom();
         final int top = getTop();
-
         drawSingleWord(canvas, getText().toString());
-
     }
 
     private void drawSingleWord(Canvas canvas,String word) {
