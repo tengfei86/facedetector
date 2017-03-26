@@ -44,6 +44,7 @@ public class TextContainer extends LinearLayout {
     }
 
     public void setDisplayText(String text) {
+        removeAllViews();
         if (!TextUtils.isEmpty(text)) {
             int length = text.length();
             for (int i = 0; i < length; i++) {

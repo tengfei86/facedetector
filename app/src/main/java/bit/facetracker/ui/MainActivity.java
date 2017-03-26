@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -30,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.background_animation)
     LottieAnimationView animationView;
 
+    @BindView(R.id.background_animation2)
+    LottieAnimationView animationView2;
+
     // hash key
     private static final float TIME_DISPLAYATTATIVE = 200;
     private static final float TIME_DISPLAYAGE = 267;
@@ -46,16 +50,10 @@ public class MainActivity extends AppCompatActivity {
     private static final float TIME_IMAGESIDE4 = 2067;
 
 
-
     private Map<Float, Boolean> mIsMarked = new HashMap<>();
     private Map<Float, Boolean> mImageMarked = new HashMap<>();
 
-
     private boolean mIsQuitAnimation;
-
-
-
-
 
     // attractive
     @BindView(R.id.attractive_progressview)
@@ -106,6 +104,14 @@ public class MainActivity extends AppCompatActivity {
     TextView mTime;
 
 
+    @BindView(R.id.first_result)
+    RelativeLayout mFirstResult;
+    @BindView(R.id.second_result)
+    RelativeLayout mSecondResult;
+
+    // 0 first 1 second
+    private int mSteps = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -121,85 +127,54 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         animationView.playAnimation();
 
         animationView.addAnimatorUpdateListener((animation -> {
 
-            LogUtils.d("animator", "time = " + animation.getCurrentPlayTime());
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
-                mIsMarked.put(TIME_DISPLAYATTATIVE, true);
-                mAttractiveProgressView.setMaxProgress(0.7f);
-                mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
-                mSelfAvatar.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490460448295&di=8c0cabacc4d5fa33ca680fe6f02d5a08&imgtype=0&src=http%3A%2F%2Fhiphotos.baidu.com%2Ftcoh%2Fpic%2Fitem%2Fffa39b25a7fbf33f908f9d7f.jpg%3Fv%3Dtbs");
-            }
+                LogUtils.d("animator", "time = " + animation.getCurrentPlayTime());
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
+                    mIsMarked.put(TIME_DISPLAYATTATIVE, true);
+                    mAttractiveProgressView.setMaxProgress(0.7f);
+                    mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
+                    mSelfAvatar.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490460448295&di=8c0cabacc4d5fa33ca680fe6f02d5a08&imgtype=0&src=http%3A%2F%2Fhiphotos.baidu.com%2Ftcoh%2Fpic%2Fitem%2Fffa39b25a7fbf33f908f9d7f.jpg%3Fv%3Dtbs");
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
-                mIsMarked.put(TIME_DISPLAYAGE, true);
-                mAgeProgressView.setMaxProgress(0.5f);
-                mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
-                mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490461006594&di=1fee390ec7b8cf488a0e0623455a0f8e&imgtype=0&src=http%3A%2F%2Fa.hiphotos.baidu.com%2Fzhidao%2Fpic%2Fitem%2F342ac65c103853438b3c5f8b9613b07ecb8088ad.jpg");
-            }
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
+                    mIsMarked.put(TIME_DISPLAYAGE, true);
+                    mAgeProgressView.setMaxProgress(0.5f);
+                    mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
+                    mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490461006594&di=1fee390ec7b8cf488a0e0623455a0f8e&imgtype=0&src=http%3A%2F%2Fa.hiphotos.baidu.com%2Fzhidao%2Fpic%2Fitem%2F342ac65c103853438b3c5f8b9613b07ecb8088ad.jpg");
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYCHARM && !mIsMarked.get(TIME_DISPLAYCHARM)) {
-                mIsMarked.put(TIME_DISPLAYCHARM, true);
-                mCharmProgressView.setMaxProgress(0.2f);
-                mCharmTextContainer.setDisplayText(getString(R.string.label_displaycharm));
-            }
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYCHARM && !mIsMarked.get(TIME_DISPLAYCHARM)) {
+                    mIsMarked.put(TIME_DISPLAYCHARM, true);
+                    mCharmProgressView.setMaxProgress(0.2f);
+                    mCharmTextContainer.setDisplayText(getString(R.string.label_displaycharm));
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
-                mIsMarked.put(TIME_MATCHSTARIMAGE, true);
-                mStarView.setVisibility(View.VISIBLE);
-                mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490524083796&di=03286777e18a55b3e39e4a66dd8f0992&imgtype=0&src=http%3A%2F%2Fscimg.jb51.net%2Ftouxiang%2F201703%2F2017032517032229.jpg");
-            }
-
-
-            if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
-                mIsMarked.put(TIME_MATCHSTARNAME, true);
-                mMatchStartTextContainer.setDisplayText("撞脸明星 方大同");
-            }
+                if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
+                    mIsMarked.put(TIME_MATCHSTARIMAGE, true);
+                    mStarView.setVisibility(View.VISIBLE);
+                    mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490524083796&di=03286777e18a55b3e39e4a66dd8f0992&imgtype=0&src=http%3A%2F%2Fscimg.jb51.net%2Ftouxiang%2F201703%2F2017032517032229.jpg");
+                }
 
 
+                if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
+                    mIsMarked.put(TIME_MATCHSTARNAME, true);
+                    mMatchStartTextContainer.setDisplayText("撞脸明星 方大同");
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_QUITFIRST && !mIsMarked.get(TIME_QUITFIRST)) {
-                mIsMarked.put(TIME_QUITFIRST,true);
-                firstQuit();
-            }
 
-
-//            if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
-//                mImageMarked.put(TIME_IMAGEMAIN, true);
-//                mMainImage.setVisibility(View.VISIBLE);
-//                mMainImage.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490512396376&di=bdbb723411b0ab542ae61f036cef315e&imgtype=0&src=http%3A%2F%2Fpic36.photophoto.cn%2F20150707%2F0047045135399298_b.jpg");
-//            }
-//
-//            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
-//                mImageMarked.put(TIME_IMAGESIDE1, true);
-//
-//                mSide1Image.setVisibility(View.VISIBLE);
-//                mSide1Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520865259&di=116bf1d4c4673b755a46c440e079f345&imgtype=0&src=http%3A%2F%2Ffile06.16sucai.com%2F2016%2F0921%2Fda78bbfe5a27798a8d300f30d5ad594e.jpg");
-//            }
-//
-//            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
-//                mImageMarked.put(TIME_IMAGESIDE2, true);
-//                mSide2Image.setVisibility(View.VISIBLE);
-//                mSide2Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520885166&di=a09e54d037b48b201b5667118cf99981&imgtype=0&src=http%3A%2F%2Ftupian.enterdesk.com%2F2015%2Fxll%2F05%2F8%2Fstar29.jpg");
-//            }
-//
-//            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
-//                mImageMarked.put(TIME_IMAGESIDE3, true);
-//                mSide3Image.setVisibility(View.VISIBLE);
-//                mSide3Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510814&di=9f9ddb699f4c03feffeb03cb71d48efa&src=http://img02.tooopen.com/images/20150703/tooopen_sy_132761691991.jpg");
-//            }
-//
-//            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
-//                mImageMarked.put(TIME_IMAGESIDE4, true);
-//                mSide4Image.setVisibility(View.VISIBLE);
-//                mSide4Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510837&di=a6c87767b4eb689df8396c57796d2111&src=http://5.66825.com/download/pic/000/326/d7b6e3f5f063dfbeec1635627988aa48.jpg");
-//            }
-
+                if (animation.getCurrentPlayTime() >= TIME_QUITFIRST && !mIsMarked.get(TIME_QUITFIRST)) {
+                    mIsMarked.put(TIME_QUITFIRST, true);
+                    firstQuit();
+                }
 
 
         }));
+
+
 
 
         animationView.addAnimatorListener(new Animator.AnimatorListener() {
@@ -211,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490461341161&di=f3fdb65d26887946104e893855c3bcb6&imgtype=0&src=http%3A%2F%2Fcdnq.duitang.com%2Fuploads%2Fitem%2F201412%2F30%2F20141230085749_tr24F.jpeg");
+
             }
 
             @Override
@@ -223,6 +199,65 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        animationView2.addAnimatorUpdateListener(animation ->  {
+
+            if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
+                mImageMarked.put(TIME_IMAGEMAIN, true);
+                mMainImage.setVisibility(View.VISIBLE);
+                mMainImage.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490512396376&di=bdbb723411b0ab542ae61f036cef315e&imgtype=0&src=http%3A%2F%2Fpic36.photophoto.cn%2F20150707%2F0047045135399298_b.jpg");
+            }
+
+            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
+                mImageMarked.put(TIME_IMAGESIDE1, true);
+
+                mSide1Image.setVisibility(View.VISIBLE);
+                mSide1Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520865259&di=116bf1d4c4673b755a46c440e079f345&imgtype=0&src=http%3A%2F%2Ffile06.16sucai.com%2F2016%2F0921%2Fda78bbfe5a27798a8d300f30d5ad594e.jpg");
+            }
+
+            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
+                mImageMarked.put(TIME_IMAGESIDE2, true);
+                mSide2Image.setVisibility(View.VISIBLE);
+                mSide2Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520885166&di=a09e54d037b48b201b5667118cf99981&imgtype=0&src=http%3A%2F%2Ftupian.enterdesk.com%2F2015%2Fxll%2F05%2F8%2Fstar29.jpg");
+            }
+
+            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
+                mImageMarked.put(TIME_IMAGESIDE3, true);
+                mSide3Image.setVisibility(View.VISIBLE);
+                mSide3Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510814&di=9f9ddb699f4c03feffeb03cb71d48efa&src=http://img02.tooopen.com/images/20150703/tooopen_sy_132761691991.jpg");
+            }
+
+            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
+                mImageMarked.put(TIME_IMAGESIDE4, true);
+                mSide4Image.setVisibility(View.VISIBLE);
+                mSide4Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510837&di=a6c87767b4eb689df8396c57796d2111&src=http://5.66825.com/download/pic/000/326/d7b6e3f5f063dfbeec1635627988aa48.jpg");
+            }
+
+        });
+
+        animationView2.addAnimatorListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                init();
+                animationView.playAnimation();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
 
         startTimer();
 
@@ -243,6 +278,30 @@ public class MainActivity extends AppCompatActivity {
         mImageMarked.put(TIME_IMAGESIDE3, false);
         mImageMarked.put(TIME_IMAGESIDE4, false);
 
+
+        mSelfAvatar.setAlpha(1.0f);
+        mAttractiveProgressView.setAlpha(1.0f);
+        mAttractiveProgressView.setTextVisible(true);
+        mAgeProgressView.setAlpha(1.0f);
+        mAgeProgressView.setTextVisible(true);
+        mCharmProgressView.setAlpha(1.0f);
+        mCharmProgressView.setTextVisible(true);
+        mAttractiveTextContainer.setVisibility(View.VISIBLE);
+        mAgeTextContainer.setVisibility(View.VISIBLE);
+        mCharmTextContainer.setVisibility(View.VISIBLE);
+        mStarView.setAlpha(1.0f);
+        mStarView.setVisibility(View.INVISIBLE);
+        mMatchStartTextContainer.setVisibility(View.VISIBLE);
+        mFirstResult.setVisibility(View.VISIBLE);
+        mSecondResult.setVisibility(View.GONE);
+        mMainImage.setVisibility(View.INVISIBLE);
+        mSide1Image.setVisibility(View.INVISIBLE);
+        mSide2Image.setVisibility(View.INVISIBLE);
+        mSide3Image.setVisibility(View.INVISIBLE);
+        mSide4Image.setVisibility(View.INVISIBLE);
+        animationView.setVisibility(View.VISIBLE);
+        animationView2.setVisibility(View.GONE);
+        mSteps = 0;
     }
 
 
@@ -281,7 +340,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-
+                mSteps = 1;
+                mFirstResult.setVisibility(View.GONE);
+                mSecondResult.setVisibility(View.VISIBLE);
+                animationView2.setVisibility(View.VISIBLE);
+                animationView.setVisibility(View.GONE);
+                animationView2.playAnimation();
             }
 
             @Override
