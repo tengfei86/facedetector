@@ -4,12 +4,15 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 
 import com.airbnb.lottie.LottieAnimationView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.image_side4)
     CustomDraweeView mSide4Image;
+
+    CountDownTimer mTimer;
+    @BindView(R.id.time)
+    TextView mTime;
 
 
     @Override
@@ -217,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        startTimer();
 
     }
 
@@ -241,23 +249,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mTimer.cancel();
     }
 
     public void createQuitAnimationSet() {
         ObjectAnimator selfAvatarAnimator = ObjectAnimator.ofFloat(mSelfAvatar,"alpha",1.0f,0.0f);
+        selfAvatarAnimator.setDuration(333);
         ObjectAnimator matchStartAnimator = ObjectAnimator.ofFloat(mStarView,"alpha",1.0f,0.0f);
+        matchStartAnimator.setDuration(333);
         ObjectAnimator attractiveprogressviewanimator = ObjectAnimator.ofFloat(mAttractiveProgressView,"alpha",1.0f,0.0f);
+        attractiveprogressviewanimator.setDuration(200);
         ObjectAnimator ageprogressviewanimator = ObjectAnimator.ofFloat(mAgeProgressView,"alpha",1.0f,0.0f);
+        ageprogressviewanimator.setDuration(200);
         ObjectAnimator charmprogressviewanimator = ObjectAnimator.ofFloat(mCharmProgressView,"alpha",1.0f,0.0f);
+        charmprogressviewanimator.setDuration(200);
         List<Animator> animators = new ArrayList<>();
         animators.add(selfAvatarAnimator);
         animators.add(attractiveprogressviewanimator);
         animators.add(ageprogressviewanimator);
         animators.add(charmprogressviewanimator);
         animators.add(matchStartAnimator);
-
         AnimatorSet set = new AnimatorSet();
-        set.setDuration(500);
         set.playSequentially(animators);
         set.start();
 
@@ -297,6 +309,23 @@ public class MainActivity extends AppCompatActivity {
 
         createQuitAnimationSet();
     }
+
+
+    public void startTimer() {
+        mTimer = new CountDownTimer(1000000000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                Calendar c = Calendar.getInstance();
+                mTime.setText((c.get(Calendar.HOUR_OF_DAY) > 10 ? c.get(Calendar.HOUR_OF_DAY) : "0" + c.get(Calendar.HOUR_OF_DAY))+":" + (c.get(Calendar.MINUTE) > 10 ? c.get(Calendar.MINUTE) : "0" + c.get(Calendar.MINUTE)));
+            }
+            public void onFinish() {
+
+            }
+        };
+        mTimer.start();
+
+    }
+
 
 
 }
