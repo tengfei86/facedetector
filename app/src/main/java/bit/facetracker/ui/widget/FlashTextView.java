@@ -66,26 +66,27 @@ public class FlashTextView extends android.support.v7.widget.AppCompatTextView {
         drawSingleWord(canvas, getText().toString());
     }
 
-    private void drawSingleWord(Canvas canvas,String word) {
+    private void drawSingleWord(Canvas canvas, String word) {
 
         int vheight = getHeight();
         int hwidth = getWidth();
 
-        Paint.FontMetrics fontMetrics =  mTextPaint.getFontMetrics();
+        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
         float fontHeight = Math.abs(fontMetrics.top) + fontMetrics.bottom;
         float fontWidth = fontHeight;
 
-        int left = (int)(hwidth - fontWidth) / 2 ;
-        int top  = (int)(vheight - fontHeight) / 2 ;
+        int left = (int) (hwidth - fontWidth) / 2;
+        int top = (int) (vheight - fontHeight) / 2;
 
-        Rect rect = new Rect(left,top,(int)(left + fontWidth),(int)(top + fontHeight));
+        Rect rect = new Rect(left, top, (int) (left + fontWidth), (int) (top + fontHeight));
         mRectPaint.setAlpha(mRectPaintAlpha);
 
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         int baselineX = rect.centerX();
         int baseLineY = (int) (rect.centerY() - fontMetrics.top / 2 - fontMetrics.bottom / 2);
-        canvas.drawText(word,baselineX,baseLineY,mTextPaint);
-        canvas.drawRect(rect,mRectPaint);
+        canvas.drawText(word, baselineX, baseLineY, mTextPaint);
+
+        canvas.drawRect(rect, mRectPaint);
 
     }
 
@@ -97,7 +98,6 @@ public class FlashTextView extends android.support.v7.widget.AppCompatTextView {
     public int getRectAlpha() {
         return mRectPaintAlpha;
     }
-
 
 
 }

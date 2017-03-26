@@ -37,7 +37,7 @@ public class ProgressView extends View {
     private final int PROGRESSBARMAXLENGTH = 352;
 
     private float mMax = 1.0f;
-
+    private boolean mIsTextVisible = true;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -132,7 +132,7 @@ public class ProgressView extends View {
 
         int baselineX = (int) rect.centerX();
         int baseLineY = (int) (rect.centerY() - fontMetrics.top / 2 - fontMetrics.bottom / 2);
-        if(mProgress >= 0.01f)
+        if(mProgress >= 0.01f && mIsTextVisible)
         canvas.drawText(String.valueOf((int)(100 * mProgress)),baselineX,baseLineY,mTextPaint);
         // Draw Progress display
 
@@ -152,6 +152,13 @@ public class ProgressView extends View {
         objectAnimator.setDuration(1000);
         objectAnimator.start();
     }
+
+
+    public void setTextVisible(boolean visible) {
+        mIsTextVisible = visible;
+        invalidate();
+    }
+
 
 
 

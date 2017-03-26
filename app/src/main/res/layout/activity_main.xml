@@ -10,14 +10,14 @@
     android:background="@android:color/holo_blue_dark"
     tools:context="bit.facetracker.ui.MainActivity">
 
-
-
     <RelativeLayout
+        android:id="@+id/first_result"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
         <bit.facetracker.ui.widget.CustomDraweeView
-            app:fadeDuration="2000"
+            app:fadeDuration="533"
             app:placeholderImage="@drawable/placeholder"
             app:placeholderImageScaleType="centerCrop"
             android:layout_marginTop="247px"
@@ -98,10 +98,11 @@
         </LinearLayout>
 
         <bit.facetracker.ui.widget.CustomDraweeView
-            app:fadeDuration="2000"
+            app:fadeDuration="533"
             app:placeholderImage="@drawable/placeholder"
             android:layout_below="@id/third_line"
             app:placeholderImageScaleType="centerCrop"
+            android:visibility="invisible"
             android:layout_marginTop="100px"
             android:layout_marginLeft="286px"
             android:id="@+id/match_star"
@@ -117,6 +118,84 @@
             android:layout_width="200dp"
             android:layout_height="match_parent" />
 
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:layout_marginTop="260px"
+        android:id="@+id/second_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <bit.facetracker.ui.widget.TextContainer
+            android:id="@+id/title"
+            android:layout_width="675px"
+            android:layout_height="55px" />
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:visibility="invisible"
+            android:layout_marginTop="46px"
+            app:fadeDuration="533"
+            app:placeholderImageScaleType="centerCrop"
+            app:placeholderImage="@drawable/placeholder"
+            android:layout_marginLeft="190px"
+            android:id="@+id/image_main"
+            android:layout_below="@id/title"
+            android:layout_width="690px"
+            android:layout_height="912px" />
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImageScaleType="centerCrop"
+            app:placeholderImage="@drawable/placeholder"
+            android:layout_marginLeft="190px"
+            android:layout_marginTop="22px"
+            android:layout_below="@id/image_main"
+            android:id="@+id/image_side1"
+            android:layout_width="332px"
+            android:layout_height="240px" />
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImageScaleType="centerCrop"
+            app:placeholderImage="@drawable/placeholder"
+            android:layout_toRightOf="@id/image_side1"
+            android:layout_marginLeft="26px"
+            android:layout_marginTop="22px"
+            android:layout_below="@id/image_main"
+            android:id="@+id/image_side2"
+            android:layout_width="332px"
+            android:layout_height="240px" />
+
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImageScaleType="centerCrop"
+            app:placeholderImage="@drawable/placeholder"
+            android:layout_marginLeft="190px"
+            android:layout_marginTop="18px"
+            android:layout_below="@id/image_side1"
+            android:id="@+id/image_side3"
+            android:layout_width="332px"
+            android:layout_height="234px" />
+
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImageScaleType="centerCrop"
+            app:placeholderImage="@drawable/placeholder"
+            android:layout_toRightOf="@id/image_side3"
+            android:layout_marginLeft="26px"
+            android:layout_marginTop="18px"
+            android:layout_below="@id/image_side2"
+            android:id="@+id/image_side4"
+            android:layout_width="332px"
+            android:layout_height="234px" />
 
     </RelativeLayout>
 
