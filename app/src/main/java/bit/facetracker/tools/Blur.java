@@ -273,4 +273,11 @@ public class Blur {
         mInputBitmap = mInputBitmap.createScaledBitmap(mInputBitmap, (int) dstWidth, (int) dstHeight, true);
     }
 
+
+    public void destroyTs() {
+        if (rs != null) {
+            rs.destroy();
+        }
+    }
+
 }

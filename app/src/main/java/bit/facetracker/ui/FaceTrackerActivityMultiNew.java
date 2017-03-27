@@ -553,6 +553,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             mCameraSource.release();
         }
         mTimer.cancel();
+        mBlurTools.destroyTs();
         EventBus.getDefault().unregister(this);
     }
 
@@ -1130,7 +1131,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     count++;
                 }
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
