@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:id="@+id/activity_main"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_blue_dark"
+    android:orientation="vertical"
+    tools:context="bit.facetracker.ui.MainActivity">
+
+    <bit.facetracker.ui.camera.CameraSourcePreview
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <bit.facetracker.ui.camera.GraphicOverlay
+            android:id="@+id/faceOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </bit.facetracker.ui.camera.CameraSourcePreview>
+
+    <FrameLayout
+        android:id="@+id/blur_background"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="260px"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10px">
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="60px"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"/>
+
+
+        <TextView
+            android:id="@+id/temperature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/white"
+            android:textSize="60px"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/first_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="247px"
+        android:background="@android:color/transparent"
+        >
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/self_avatar"
+            android:layout_width="504px"
+            android:layout_height="496px"
+            android:layout_marginLeft="286px"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+        <LinearLayout
+            android:id="@+id/first_line"
+            android:layout_width="wrap_content"
+            android:layout_height="56px"
+            android:layout_below="@id/self_avatar"
+            android:layout_marginLeft="288px"
+            android:layout_marginTop="55px"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal">
+
+            <bit.facetracker.ui.widget.TextContainer
+                android:id="@+id/attractive_textcontainer"
+                android:layout_width="126px"
+                android:layout_height="match_parent"/>
+
+            <bit.facetracker.ui.widget.ProgressView
+                android:id="@+id/attractive_progressview"
+                android:layout_width="448px"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="32px"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/second_line"
+            android:layout_width="wrap_content"
+            android:layout_height="56px"
+            android:layout_below="@id/first_line"
+            android:layout_marginLeft="288px"
+            android:layout_marginTop="61px"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal">
+
+            <bit.facetracker.ui.widget.TextContainer
+                android:id="@+id/age_textcontainer"
+                android:layout_width="126px"
+                android:layout_height="match_parent"/>
+
+            <bit.facetracker.ui.widget.ProgressView
+                android:id="@+id/age_progressview"
+                android:layout_width="448px"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="32px"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/third_line"
+            android:layout_width="wrap_content"
+            android:layout_height="56px"
+            android:layout_below="@id/second_line"
+            android:layout_marginLeft="288px"
+            android:layout_marginTop="61px"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal">
+
+            <bit.facetracker.ui.widget.TextContainer
+                android:id="@+id/charm_textcontainer"
+                android:layout_width="126px"
+                android:layout_height="match_parent"/>
+
+            <bit.facetracker.ui.widget.ProgressView
+                android:id="@+id/charm_progressview"
+                android:layout_width="448px"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="32px"/>
+
+
+        </LinearLayout>
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/match_star"
+            android:layout_width="504px"
+            android:layout_height="496px"
+            android:layout_below="@id/third_line"
+            android:layout_marginLeft="286px"
+            android:layout_marginTop="100px"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+
+        <bit.facetracker.ui.widget.TextContainer
+            android:id="@+id/matchstart_textcontainer"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/match_star"
+            android:layout_marginLeft="288px"
+            android:layout_marginTop="42px"/>
+
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/second_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="260px"
+        android:background="@android:color/transparent"
+        android:visibility="gone">
+
+        <bit.facetracker.ui.widget.TextContainer
+            android:id="@+id/title"
+            android:layout_width="675px"
+            android:layout_height="55px"/>
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/image_main"
+            android:layout_width="690px"
+            android:layout_height="912px"
+            android:layout_below="@id/title"
+            android:layout_marginLeft="190px"
+            android:layout_marginTop="46px"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/image_side1"
+            android:layout_width="332px"
+            android:layout_height="240px"
+            android:layout_below="@id/image_main"
+            android:layout_marginLeft="190px"
+            android:layout_marginTop="22px"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/image_side2"
+            android:layout_width="332px"
+            android:layout_height="240px"
+            android:layout_below="@id/image_main"
+            android:layout_marginLeft="26px"
+            android:layout_marginTop="22px"
+            android:layout_toRightOf="@id/image_side1"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/image_side3"
+            android:layout_width="332px"
+            android:layout_height="234px"
+            android:layout_below="@id/image_side1"
+            android:layout_marginLeft="190px"
+            android:layout_marginTop="18px"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+
+        <bit.facetracker.ui.widget.CustomDraweeView
+            android:id="@+id/image_side4"
+            android:layout_width="332px"
+            android:layout_height="234px"
+            android:layout_below="@id/image_side2"
+            android:layout_marginLeft="26px"
+            android:layout_marginTop="18px"
+            android:layout_toRightOf="@id/image_side3"
+            android:visibility="invisible"
+            app:fadeDuration="533"
+            app:placeholderImage="@drawable/placeholder"
+            app:placeholderImageScaleType="centerCrop"/>
+
+    </RelativeLayout>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/background_animation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        app:lottie_fileName="ui_2_strokes.json"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/background_animation2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        app:lottie_fileName="ui_3_strokes_.json"/>
+
+    </FrameLayout>
+
+
+</FrameLayout>

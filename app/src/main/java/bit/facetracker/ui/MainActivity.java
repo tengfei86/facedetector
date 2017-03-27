@@ -109,9 +109,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.second_result)
     RelativeLayout mSecondResult;
 
-    // 0 first 1 second
-    private int mSteps = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -301,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
         mSide4Image.setVisibility(View.INVISIBLE);
         animationView.setVisibility(View.VISIBLE);
         animationView2.setVisibility(View.GONE);
-        mSteps = 0;
+
     }
 
 
@@ -340,7 +337,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mSteps = 1;
                 mFirstResult.setVisibility(View.GONE);
                 mSecondResult.setVisibility(View.VISIBLE);
                 animationView2.setVisibility(View.VISIBLE);

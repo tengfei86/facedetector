@@ -48,6 +48,8 @@ public class CameraSourcePreview extends ViewGroup {
 
         mSurfaceView = new SurfaceView(context);
         mSurfaceView.getHolder().addCallback(new SurfaceCallback());
+
+
         addView(mSurfaceView);
     }
 
