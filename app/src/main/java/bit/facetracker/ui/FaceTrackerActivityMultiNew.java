@@ -46,7 +46,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -74,10 +73,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +82,6 @@ import java.util.Map;
 import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
-import bit.facetracker.job.WearJob;
 import bit.facetracker.model.Result;
 import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.Blur;
@@ -287,7 +283,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             e.printStackTrace();
         }
 
-        animationView.playAnimation();
+//        animationView.playAnimation();
 
         animationView.addAnimatorUpdateListener((animation -> {
 
@@ -419,8 +415,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
         startTimer();
-        BlurBackgourndTask taskblur = new BlurBackgourndTask();
-        taskblur.start();
+//        BlurBackgourndTask taskblur = new BlurBackgourndTask();
+//        taskblur.start();
 
 //        mBlurBackground.setBackgroundResource(R.drawable.blur_background);
 
@@ -656,11 +652,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
      */
     private class GraphicFaceTracker extends Tracker<Face> {
         private GraphicOverlay mOverlay;
-        private FaceGraphicNew mFaceGraphic;
+        private FaceGraphicMove mFaceGraphic;
 
         GraphicFaceTracker(GraphicOverlay overlay) {
             mOverlay = overlay;
-            mFaceGraphic = new FaceGraphicNew(overlay);
+            mFaceGraphic = new FaceGraphicMove(overlay);
         }
 
         /**
@@ -1023,7 +1019,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mStarView.setAlpha(1.0f);
         mStarView.setVisibility(View.INVISIBLE);
         mMatchStartTextContainer.setVisibility(View.VISIBLE);
-        mFirstResult.setVisibility(View.VISIBLE);
+        mFirstResult.setVisibility(View.GONE);
         mSecondResult.setVisibility(View.GONE);
         mMainImage.setVisibility(View.INVISIBLE);
         mSide1Image.setVisibility(View.INVISIBLE);

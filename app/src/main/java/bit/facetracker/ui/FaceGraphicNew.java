@@ -47,6 +47,8 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
 
     private float OFFSET = (float)(1.0 / 8);
 
+    private int LOOPCOUNT  = 7;
+
     private static final int COLOR_CHOICES[] = {
         Color.BLUE,
         Color.CYAN,
@@ -108,25 +110,27 @@ public class FaceGraphicNew extends GraphicOverlay.Graphic {
             return;
         }
 
-        if (type == 1 || type == 2) {
-            updateProgress();
-        }
+        for(int i =0; i < LOOPCOUNT;i++) {
+            if (type == 1 || type == 2) {
+                updateProgress();
+            }
 
-        // Draws a circle at the position of the detected face, with the face's track id below.
-        float x = translateX(face.getPosition().x + face.getWidth() / 2);
-        float y = translateY(face.getPosition().y + face.getHeight() / 2);
+            // Draws a circle at the position of the detected face, with the face's track id below.
+            float x = translateX(face.getPosition().x + face.getWidth() / 2);
+            float y = translateY(face.getPosition().y + face.getHeight() / 2);
 
-        haftWidth = scaleX(face.getWidth() / 2.0f);
-        halfHeight = scaleY(face.getHeight() / 2.0f);
+            haftWidth = scaleX(face.getWidth() / 2.0f);
+            halfHeight = scaleY(face.getHeight() / 2.0f);
 
-        float xOffset = scaleX(face.getWidth() * 2 / 3.0f);
-        float yOffset = scaleY(face.getHeight() * 2 / 3.0f);
+            float xOffset = scaleX(face.getWidth() * 2 / 3.0f);
+            float yOffset = scaleY(face.getHeight() * 2 / 3.0f);
 
-        initStartDrawPoint(x, y, xOffset, yOffset);
-        drawRect(canvas, mBoxPaint, xOffset, yOffset,x, y);
+            initStartDrawPoint(x, y, xOffset, yOffset);
+            drawRect(canvas, mBoxPaint, xOffset, yOffset,x, y);
 
-        if (type == 0 ) {
-            type = ++type % 3;
+            if (type == 0 ) {
+                type = ++type % 3;
+            }
         }
 
     }
