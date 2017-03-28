@@ -15,17 +15,18 @@
  */
 package bit.facetracker.ui;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.text.TextPaint;
 
 import com.google.android.gms.vision.face.Face;
 
-import bit.facetracker.R;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.GraphicOverlay;
 
@@ -34,19 +35,11 @@ import bit.facetracker.ui.camera.GraphicOverlay;
  * graphic overlay view.
  */
 public class FaceGraphicMove extends GraphicOverlay.Graphic {
-    private static final float FACE_POSITION_RADIUS = 10.0f;
-    private static final float ID_TEXT_SIZE = 40.0f;
-    private static final float ID_Y_OFFSET = 50.0f;
-    private static final float ID_X_OFFSET = -50.0f;
-    private static final float BOX_STROKE_WIDTH = 5.0f;
 
     private volatile float progress = 0.0f;
     private float rectBand = 10.0f;
-
     private float OFFSET = (float) (1.0 / 8);
-
     private int LOOPCOUNT = 2;
-
     private static final int COLOR_CHOICES[] = {
             Color.BLUE,
             Color.CYAN,
@@ -57,30 +50,56 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
             Color.YELLOW
     };
 
-    private static int mCurrentColorIndex = 0;
-
     private Paint mBoxPaint;
-
+    private Paint mGradientPaint;
+    private TextPaint mTextPaint;
     private volatile Face mFace;
 
     private PointF[] startDrawPoint = {new PointF(), new PointF(), new PointF(), new PointF()};
 
     private RectF commonRectF = new RectF();
+    private RectF scanBodyRectF = new RectF();
+    private RectF gradientRectF = new RectF();
 
     // 0 step one | 1 step two
     private int type = 0;
-    private float haftWidth;
-    private float halfHeight;
 
     private float fullwidth;
     private float fullheight;
     private int mFaceId;
 
+    private boolean mIsScanBody = true;
+    private float SCANBODYOFFSET = (float) (1.0 / 30);
+    private float mScanBodyProgress = 0.0f;
+
+    private float mNormalRectOffsetRatio  = 0.5f;
+    private float mScanBodyRectOffsetRatio = (float)(3.0 / 2.0) ;
+
+    // scanbody down offset
+    private static final float DOWNOFFSET = 20f;
+    private static  final float ScanBodyRectBand = 10.0f;
+    private static  final float MULTI_FACEREGION = 1.0f;
+    private static  final float GRADIENT_HEIGHT = 50.0f;
+
     FaceGraphicMove(GraphicOverlay overlay) {
         super(overlay);
         mBoxPaint = new Paint();
         mBoxPaint.setColor(Color.WHITE);
+        mBoxPaint.setAntiAlias(true);
+        mBoxPaint.setTextSize(60);
         mBoxPaint.setStyle(Paint.Style.FILL);
+
+
+        mGradientPaint = new Paint();
+        mGradientPaint.setColor(Color.WHITE);
+        mGradientPaint.setAntiAlias(true);
+        mGradientPaint.setStyle(Paint.Style.FILL);
+
+        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setColor(Color.WHITE);
+        mTextPaint.setTextSize(60);
+        mTextPaint.setStyle(Paint.Style.FILL);
+
     }
 
     void setId(int id) {
@@ -115,10 +134,16 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
             fullwidth = scaleX(face.getWidth());
             fullheight = scaleY(face.getHeight());
 
-            float xOffset = scaleX(face.getWidth() * 1 / 2.0f);
-            float yOffset = scaleY(face.getHeight() * 1 / 2.0f);
+            float xOffset = scaleX(face.getWidth() * mNormalRectOffsetRatio);
+            float yOffset = scaleY(face.getHeight() * mNormalRectOffsetRatio);
 
             drawRect(canvas, mBoxPaint, originalX, originalY, xOffset, yOffset, progress);
+
+            if (mIsScanBody) {
+                float xScanBodyOffset = scaleX(face.getWidth() * mScanBodyRectOffsetRatio);
+                drawScanBodyRect(canvas, mBoxPaint, originalX, originalY,xScanBodyOffset,mScanBodyProgress, fullheight, fullwidth);
+            }
+
         }
 
     }
@@ -129,6 +154,11 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
             progress = 0.0f;
             type = ++type % 2;
         }
+
+        if (mIsScanBody && mScanBodyProgress <= 2) {
+            mScanBodyProgress += SCANBODYOFFSET;
+        }
+
     }
 
     private void drawRect(Canvas canvas, Paint paint, float originX, float originY, float xOffset, float yOffset, float progress) {
@@ -206,6 +236,49 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
 
     }
 
+    private void drawScanBodyRect(Canvas canvas, Paint paint, float originX, float originY, float xOffset,float progress,float fullheight,float fullwidth) {
+
+        if (progress <= 1) {
+            float left = originX - (xOffset - fullwidth) / 2;
+            float top = originY + fullheight + DOWNOFFSET;
+
+            float right = left + xOffset * progress;
+            float bottom = top  + ScanBodyRectBand;
+            scanBodyRectF.set(left,top,right,bottom);
+            canvas.drawRect(scanBodyRectF,paint);
+
+        } else  {
+
+            float topmovement = (progress - 1) * MULTI_FACEREGION * fullheight;
+            float bottomovement  = fullheight - (progress - 1) * MULTI_FACEREGION * fullheight;
+
+            float movment = Math.min(topmovement,GRADIENT_HEIGHT);
+
+            if (bottomovement <= GRADIENT_HEIGHT) {
+                movment = bottomovement;
+            }
+
+            float left = originX - (xOffset - fullwidth) / 2;
+            float top = originY + fullheight + DOWNOFFSET + topmovement;
+
+            float right = left + xOffset;
+            float bottom = top  + ScanBodyRectBand;
+
+            scanBodyRectF.set(left,top,right,bottom);
+            canvas.drawRect(scanBodyRectF,paint);
+
+            float gradienttop = originY + fullheight + DOWNOFFSET + (progress - 1) * MULTI_FACEREGION * fullheight - movment;
+            float gradientright = left + xOffset;
+            float gradientbottom = gradienttop  + movment;
+            gradientRectF.set(left,gradienttop,gradientright,gradientbottom);
+            Shader shader  = new LinearGradient(left,gradienttop,left,gradientbottom,0x00FFFFFF,0x9FFFFFFF, Shader.TileMode.CLAMP);
+            mGradientPaint.setShader(shader);
+            canvas.drawRect(gradientRectF,mGradientPaint);
+            canvas.drawText(String.valueOf((int) (Math.min(((progress - 1) * 100 + 1),100))) + '%',gradientright + 10,top,mTextPaint);
+
+        }
+
+    }
 
 
 
