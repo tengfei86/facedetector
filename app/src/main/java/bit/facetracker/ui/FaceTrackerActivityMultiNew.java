@@ -19,6 +19,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -46,6 +47,12 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -224,6 +231,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     Blur mBlurTools;
 
     volatile BitmapDrawable mBackgroundDrawable;
+
+    AnimatorSet mSelfAvatarSet;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -415,6 +424,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
         startTimer();
+
+
+
+
+//        startDisplay();
+
 //        BlurBackgourndTask taskblur = new BlurBackgourndTask();
 //        taskblur.start();
 
@@ -716,9 +731,17 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     mCurrentGotFace = face;
                     mIsGetBitmap = true;
                     CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
-                    LogUtils.d("Count","got it");
-                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
-                    capturetask.execute(mFrame);
+                    LogUtils.d("Count","got it==============================");
+//                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
+//                    capturetask.execute(mFrame);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startDisplay();
+                        }
+                    });
+
                 }
             }
 
@@ -836,11 +859,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 Bitmap bitmap = getBitmap(frame);
                 if (bitmap != null) {
 
-                    double x = Math.max(0,mFace.getPosition().x);
-                    double y = Math.max(0,mFace.getPosition().y);
+                    double x = Math.max(0,mFace.getPosition().x - 20);
+                    double y = Math.max(0,mFace.getPosition().y - 20);
 
-                    double w = mFace.getWidth();
-                    double h = mFace.getHeight();
+                    double w = mFace.getWidth() + 40;
+                    double h = mFace.getHeight() + 40;
 
                     if (mFace.getPosition().x < 0) {
                         w += mFace.getPosition().x;
@@ -1103,7 +1126,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             public void onTick(long millisUntilFinished) {
                 Calendar c = Calendar.getInstance();
-                mTime.setText((c.get(Calendar.HOUR_OF_DAY) > 10 ? c.get(Calendar.HOUR_OF_DAY) : "0" + c.get(Calendar.HOUR_OF_DAY))+":" + (c.get(Calendar.MINUTE) > 10 ? c.get(Calendar.MINUTE) : "0" + c.get(Calendar.MINUTE)));
+                mTime.setText((c.get(Calendar.HOUR_OF_DAY) >= 10 ? c.get(Calendar.HOUR_OF_DAY) : "0" + c.get(Calendar.HOUR_OF_DAY))+":" + (c.get(Calendar.MINUTE) >= 10 ? c.get(Calendar.MINUTE) : "0" + c.get(Calendar.MINUTE)));
             }
             public void onFinish() {
 
@@ -1137,7 +1160,90 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
     }
 
+    // get result from server
+    private void startDisplay() {
 
+        mFirstResult.setVisibility(View.VISIBLE);
+//        int deltaX = (int)(mSelfAvatar.getLeft() - mFace.getPosition().x);
+//        int deltaY = (int)(mSelfAvatar.getTop() - mFace.getPosition().y);
+//
+//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(mSelfAvatar, "translationX", deltaX);
+//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(mSelfAvatar, "translationY", deltaY);
+//
+//        ValueAnimator widthAnimator = ValueAnimator.ofInt((int)mFace.getWidth(), 504);
+//        ValueAnimator heightAnimator = ValueAnimator.ofInt((int)mFace.getHeight(), 496);
+
+
+//
+//        int deltaX = 100;
+//        int deltaY = 100;
+//
+//        LogUtils.d("startDisplay","x = " +  mSelfAvatar.getLeft());
+//        LogUtils.d("startDisplay","y = " +  mSelfAvatar.getTop());
+//
+//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(mSelfAvatar, "translationX", deltaX,188);
+//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(mSelfAvatar, "translationY", deltaY,150);
+//
+//        ValueAnimator widthAnimator = ValueAnimator.ofInt(200, 504);
+//        ValueAnimator heightAnimator = ValueAnimator.ofInt(200, 496);
+//
+//        widthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animation) {
+//                int val = (int)animation.getAnimatedValue();
+//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)mSelfAvatar.getLayoutParams();
+//                params.width = val;
+//                mSelfAvatar.setLayoutParams(params);
+//            }
+//        });
+//
+//        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animation) {
+//                int val = (int)animation.getAnimatedValue();
+//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)mSelfAvatar.getLayoutParams();
+//                params.height = val;
+//                mSelfAvatar.setLayoutParams(params);
+//            }
+//        });
+//
+//        mSelfAvatarSet = new AnimatorSet();
+//        mSelfAvatarSet.setDuration(5000);
+//        mSelfAvatarSet.playTogether(scaleX,scaleY,widthAnimator,heightAnimator);
+//        mSelfAvatarSet.start();
+
+        LogUtils.d("Count","===================x = " + mCurrentGotFace.getPosition().x + "y = " + mCurrentGotFace.getPosition().y + "width = " + mCurrentGotFace.getWidth() + "height = " + mCurrentGotFace.getHeight());
+
+        TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE,mCurrentGotFace.getPosition().x-288, Animation.ABSOLUTE,0, Animation.ABSOLUTE,mCurrentGotFace.getPosition().y-250,Animation.ABSOLUTE,0);
+        transformation.setDuration(1000);
+        transformation.setFillAfter(true);
+        AnimationSet set = new AnimationSet(true);
+        set.addAnimation(transformation);
+        ScaleAnimation scaleAnimation = new ScaleAnimation((float) (mCurrentGotFace.getWidth() / 504),1.0f,(float) (mCurrentGotFace.getHeight() / 496),1.0f);
+        scaleAnimation.setDuration(1000);
+        scaleAnimation.setFillAfter(true);
+        set.addAnimation(scaleAnimation);
+
+        mSelfAvatar.setAnimation(set);
+        set.start();
+        set.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                        animationView.playAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+    }
 
 
 }
