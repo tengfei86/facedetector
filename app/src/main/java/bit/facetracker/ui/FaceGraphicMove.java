@@ -68,7 +68,7 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
     private float fullheight;
     private int mFaceId;
 
-    private boolean mIsScanBody = true;
+    private volatile boolean mIsScanBody = false;
     private float SCANBODYOFFSET = (float) (1.0 / 30);
     private float mScanBodyProgress = 0.0f;
 
@@ -80,6 +80,13 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
     private static  final float ScanBodyRectBand = 10.0f;
     private static  final float MULTI_FACEREGION = 1.0f;
     private static  final float GRADIENT_HEIGHT = 50.0f;
+
+
+    ScanBodyCompleteListener mScanBodyCompleteListener;
+
+    public void setScanBodyCompleteListener(ScanBodyCompleteListener scanBodyCompleteListener) {
+        this.mScanBodyCompleteListener = scanBodyCompleteListener;
+    }
 
     FaceGraphicMove(GraphicOverlay overlay) {
         super(overlay);
@@ -104,6 +111,10 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
 
     void setId(int id) {
         mFaceId = id;
+    }
+
+    public synchronized void setScanBody(boolean scanBody) {
+        mIsScanBody = scanBody;
     }
 
     /**
@@ -157,6 +168,11 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
 
         if (mIsScanBody && mScanBodyProgress <= 2) {
             mScanBodyProgress += SCANBODYOFFSET;
+        } else if(mIsScanBody){
+            if(mScanBodyCompleteListener != null)
+            mScanBodyCompleteListener.complete();
+            mIsScanBody = false;
+            mScanBodyProgress = 0;
         }
 
     }
@@ -278,6 +294,10 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
 
         }
 
+    }
+
+    public interface ScanBodyCompleteListener {
+        void complete();
     }
 
 

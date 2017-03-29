@@ -238,7 +238,7 @@ public class Blur {
         Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);
 
         Matrix matrix = new Matrix();
-        matrix.postRotate(-90);
+        matrix.postRotate(90);
         Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         return disbitmap;

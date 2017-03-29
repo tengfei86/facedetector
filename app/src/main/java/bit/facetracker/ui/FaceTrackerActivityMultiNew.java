@@ -19,7 +19,6 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -49,9 +48,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -90,7 +87,6 @@ import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
 import bit.facetracker.model.Result;
-import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.Blur;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.tools.ToastUtils;
@@ -122,6 +118,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private int mScreenWidth = 1080;
 
     public volatile  boolean mIsGetBitmap;
+    public volatile  boolean mIsGetDetectResult;
 
 
     private volatile Face mFace;
@@ -130,6 +127,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private static final int MAXOFFSET_X = 5;
     private static final int MAXOFFSET_Y = 5;
     private static volatile String CAPTUREPATHDIR = "/sdcard/pics/";
+    private static volatile String CAPTURECROPIMGPATH = "";
     private static volatile String CAPTUREIMGPATH = "";
     private static final int MAXSHOTCOUNT = 15;
 
@@ -659,19 +657,28 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         public Tracker<Face> create(Face face) {
             return new GraphicFaceTracker(mGraphicOverlay);
         }
+
     }
 
     /**
      * Face tracker for each detected individual. This maintains a face graphic within the app's
      * associated face overlay.
      */
+
+    private FaceGraphicMove mFaceGraphic;
+
     private class GraphicFaceTracker extends Tracker<Face> {
         private GraphicOverlay mOverlay;
-        private FaceGraphicMove mFaceGraphic;
 
         GraphicFaceTracker(GraphicOverlay overlay) {
             mOverlay = overlay;
             mFaceGraphic = new FaceGraphicMove(overlay);
+            mFaceGraphic.setScanBodyCompleteListener(new FaceGraphicMove.ScanBodyCompleteListener() {
+                @Override
+                public void complete() {
+                    startDisplay();
+                }
+            });
         }
 
         /**
@@ -684,7 +691,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             FaceContainer container = new FaceContainer(item);
             mDetectedFaces.put(faceId, container);
             mFaceGraphic.setId(faceId);
-
+            mOverlay.add(mFaceGraphic);
         }
 
         /**
@@ -728,24 +735,19 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mDetectedFaces.get(face.getId()).face = face;
 
                 if (mDetectedFaces.get(face.getId()).count >= MAXSHOTCOUNT) {
+
                     mCurrentGotFace = face;
                     mIsGetBitmap = true;
-                    CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
+                    CAPTURECROPIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
+                    CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "full" + "_" + "capture.png";
                     LogUtils.d("Count","got it==============================");
-//                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTUREIMGPATH);
-//                    capturetask.execute(mFrame);
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            startDisplay();
-                        }
-                    });
+                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTURECROPIMGPATH,CAPTUREIMGPATH);
+                    capturetask.execute(mFrame);
 
                 }
             }
 
-            mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
         }
 
@@ -766,17 +768,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
-
             if (mIsGetBitmap) {
-                mIsGetBitmap = false;
-                mCurrentGotFace = null;
-                runOnUiThread(new Runnable() {
 
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // TODO init
-
-
+                        init();
                     }
                 });
             }
@@ -829,12 +826,14 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
     }
 
-    class CropPreviewFrame extends AsyncTask<Frame,String,File> {
+    class CropPreviewFrame extends AsyncTask<Frame,String,String> {
 
-        String filepath;
+        String filecroppath;
+        String filefullpath;
 
-        public CropPreviewFrame(String filepath) {
-            this.filepath = filepath;
+        public CropPreviewFrame(String filepath,String fullimagepath) {
+            this.filecroppath = filepath;
+            this.filefullpath  = fullimagepath;
         }
 
         /**
@@ -852,7 +851,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
          * @see #publishProgress
          */
         @Override
-        protected File doInBackground(Frame... params) {
+        protected String doInBackground(Frame... params) {
             Frame frame = params[0];
             File file = null;
             if (frame != null) {
@@ -891,7 +890,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         dir.mkdir();
                     }
 
-                    file = new File(filepath);
+                    file = new File(filecroppath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
                         disbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
@@ -901,15 +900,33 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+
+                    file = new File(filefullpath);
+                    try {
+                        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                        outputStream.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
-            return file;
+            return filefullpath;
         }
 
         @Override
-        protected void onPostExecute(File file) {
+        protected void onPostExecute(String file) {
             super.onPostExecute(file);
-            detectorface(file.getAbsolutePath());
+
+            // TEST
+            mIsGetDetectResult = true;
+            mFaceGraphic.setScanBody(mIsGetDetectResult);
+
+            detectorface(file);
         }
 
         private Bitmap getBitmap(Frame frame) {
@@ -938,65 +955,17 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             if (result.face_num > 0) {
                 // TODO facenum >= 1
+                mIsGetDetectResult = true;
+                mFaceGraphic.setScanBody(mIsGetDetectResult);
 
-//                anim.addListener(new Animator.AnimatorListener() {
-//                    @Override
-//                    public void onAnimationStart(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationEnd(Animator animation) {
-//
-//                        mHandler.postDelayed(new Runnable() {
-//                            @Override
-//                            public void run() {
-//
-//                                if (result.attributes.gender.size() > 1) {
-//                                    int gender = 0;
-//                                    if(result.attributes.gender.get(0).probability < result.attributes.gender.get(1).probability) {
-//                                        gender = 1;
-//                                    }
-//                                    WearJob wearJob = new WearJob(gender);
-//                                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
-//                                }else {
-//                                    WearJob wearJob = new WearJob();
-//                                    AndroidApplication.getInstance().getJobManager().addJob(wearJob);
-//                                }
-//                            }
-//                        }, 3000);
-//
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationCancel(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationRepeat(Animator animation) {
-//
-//                    }
-//                });
+
 
             } else {
-                ToastUtils.showLong(this,"抱歉，没有检测到人脸区域 O(∩_∩)O");
+                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
             }
 
 
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(WearResult wearResult) {
-        if (wearResult != null && wearResult.code.equals("200") && mIsGetBitmap) {
-
-            // TODO get result
-
-
-        }
-
     }
 
 
@@ -1053,6 +1022,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         animationView2.setVisibility(View.GONE);
         mBlurBackground.setBackgroundColor(Color.TRANSPARENT);
 
+        mIsGetBitmap = false;
+        mIsGetDetectResult = false;
+        mCurrentGotFace = null;
 
     }
 
@@ -1146,11 +1118,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                 LogUtils.d("blur","mFrameToBlur = " + mFrameToBlur);
                 if (mFrameToBlur != null) {
-                    mBackgroundDrawable =  mBlurTools.blur(mFrameToBlur,4.0f,25f);
+                    mBackgroundDrawable =  mBlurTools.blur(mFrameToBlur,count + 1,25f);
                     count++;
                 }
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -1160,59 +1132,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
     }
 
-    // get result from server
+    // got result from server
     private void startDisplay() {
 
         mFirstResult.setVisibility(View.VISIBLE);
-//        int deltaX = (int)(mSelfAvatar.getLeft() - mFace.getPosition().x);
-//        int deltaY = (int)(mSelfAvatar.getTop() - mFace.getPosition().y);
-//
-//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(mSelfAvatar, "translationX", deltaX);
-//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(mSelfAvatar, "translationY", deltaY);
-//
-//        ValueAnimator widthAnimator = ValueAnimator.ofInt((int)mFace.getWidth(), 504);
-//        ValueAnimator heightAnimator = ValueAnimator.ofInt((int)mFace.getHeight(), 496);
-
-
-//
-//        int deltaX = 100;
-//        int deltaY = 100;
-//
-//        LogUtils.d("startDisplay","x = " +  mSelfAvatar.getLeft());
-//        LogUtils.d("startDisplay","y = " +  mSelfAvatar.getTop());
-//
-//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(mSelfAvatar, "translationX", deltaX,188);
-//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(mSelfAvatar, "translationY", deltaY,150);
-//
-//        ValueAnimator widthAnimator = ValueAnimator.ofInt(200, 504);
-//        ValueAnimator heightAnimator = ValueAnimator.ofInt(200, 496);
-//
-//        widthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                int val = (int)animation.getAnimatedValue();
-//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)mSelfAvatar.getLayoutParams();
-//                params.width = val;
-//                mSelfAvatar.setLayoutParams(params);
-//            }
-//        });
-//
-//        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                int val = (int)animation.getAnimatedValue();
-//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)mSelfAvatar.getLayoutParams();
-//                params.height = val;
-//                mSelfAvatar.setLayoutParams(params);
-//            }
-//        });
-//
-//        mSelfAvatarSet = new AnimatorSet();
-//        mSelfAvatarSet.setDuration(5000);
-//        mSelfAvatarSet.playTogether(scaleX,scaleY,widthAnimator,heightAnimator);
-//        mSelfAvatarSet.start();
-
-        LogUtils.d("Count","===================x = " + mCurrentGotFace.getPosition().x + "y = " + mCurrentGotFace.getPosition().y + "width = " + mCurrentGotFace.getWidth() + "height = " + mCurrentGotFace.getHeight());
 
         TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE,mCurrentGotFace.getPosition().x-288, Animation.ABSOLUTE,0, Animation.ABSOLUTE,mCurrentGotFace.getPosition().y-250,Animation.ABSOLUTE,0);
         transformation.setDuration(1000);
