@@ -513,7 +513,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
-                .setRequestedPreviewSize(1920,1080)
+                .setRequestedPreviewSize(1280,720)
                 .setAutoFocusEnabled(true)
                 .setFacing(1)
                 .setRequestedFps(30.0f)
@@ -643,7 +643,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             try {
                 mPreview.start(mCameraSource, mGraphicOverlay);
             } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
                 mCameraSource.release();
                 mCameraSource = null;
             }
@@ -686,7 +685,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         public void onNewItem(int faceId, Face item) {
 
-            LogUtils.d("onNewItem","faceId = " + faceId);
             //TODO  split face
             mOverlay.clear();
 
@@ -723,7 +721,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
 
             // Split Face
-            LogUtils.d("onUpdate","time = " + (System.currentTimeMillis() - timestamp));
             timestamp = System.currentTimeMillis();
 
             if (!mIsGetBitmap) {
@@ -741,9 +738,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     lastY  = (float)(mFace.getPosition().y + mFace.getHeight() / 2.0);
                 }
 
-                if(mFace != null) {
-                    LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
-                }
+//                if(mFace != null) {
+//                    LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
+//                }
 
                 if (Math.abs(currentX - lastX) <= MAXOFFSET_X && Math.abs(currentY - lastY) <= MAXOFFSET_Y && !mIsGetBitmap && mFace != null) {
                     mDetectedFaces.get(face.getId()).count++;
@@ -831,8 +828,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mFrame = frame;
             }
 
-            LogUtils.d("blur", "mFrameToBlur detect");
-
             mFrameToBlur = frame;
             return mDelegate.detect(frame);
         }
@@ -901,10 +896,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     }
 
                     final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)x,(int)y,(int)w,(int)h);
-
-                    LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
-
-                    LogUtils.d("Position","x = " + (int)mFace.getPosition().x + "y = " + mFace.getPosition().y + "width = " + mFace.getWidth() + "heith = "  + mFace.getHeight());
                     File dir = new File(CAPTUREPATHDIR);
                     if (!dir.exists()) {
                         dir.mkdir();
@@ -941,7 +932,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         protected void onPostExecute(String file) {
             super.onPostExecute(file);
-            startDisplay();
             detectorface(file, getMacAddress(),getFaceRect(mCurrentGotFace));
         }
 
@@ -967,19 +957,23 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(FaceDetectResult result) {
-        if (result != null && result.code.equals("200") && mIsGetBitmap) {
+//        if (result != null && result.code.equals("200") && mIsGetBitmap) {
+//
+//            if (result.result != null && result.result.face.face_num > 0) {
+//                mResult = result;
+//                mIsGetDetectResult = true;
+//                mFaceGraphic.setScanBody(mIsGetDetectResult);
+//            } else {
+//                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+//            }
+//
+//        }else {
+//            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+//        }
 
-            if (result.result != null && result.result.face.face_num > 0) {
-                mResult = result;
-                mIsGetDetectResult = true;
-                mFaceGraphic.setScanBody(mIsGetDetectResult);
-            } else {
-                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
-            }
-
-        }else {
-            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
-        }
+        // Test
+        mIsGetDetectResult = true;
+        mFaceGraphic.setScanBody(mIsGetDetectResult);
     }
 
 
@@ -1111,7 +1105,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
     public void startTimer() {
-        mTimer = new CountDownTimer(1000000000, 1000) {
+        mTimer = new CountDownTimer(1000000000, 60000) {
 
             public void onTick(long millisUntilFinished) {
                 Calendar c = Calendar.getInstance();
@@ -1133,13 +1127,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             int count = 0;
             while (!isInterrupted() && count <= 5) {
 
-                LogUtils.d("blur","mFrameToBlur = " + mFrameToBlur);
                 if (mFrameToBlur != null) {
                     mBackgroundDrawable =  mBlurTools.blur(mFrameToBlur,count + 1,25f);
                     count++;
                 }
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

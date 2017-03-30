@@ -40,7 +40,11 @@ public class FaceDetectorJob extends BaseJob {
         params.put(RequestParamers.FaceDetector.FACERECT,faceRect);
         String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, null, "image", file);
         FaceDetectResult resultObj = GsonUtils.fromJson(result, FaceDetectResult.class);
-        EventBus.getDefault().post(resultObj);
-        LogUtils.d("FaceDetecor", "result = "  + result);
+        if (resultObj != null) {
+            EventBus.getDefault().post(resultObj);
+            LogUtils.d("FaceDetecor", "result = "  + result);
+        }else {
+            EventBus.getDefault().post(new FaceDetectResult());
+        }
     }
 }
