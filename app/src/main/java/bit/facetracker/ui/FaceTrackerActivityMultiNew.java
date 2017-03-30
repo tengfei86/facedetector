@@ -76,9 +76,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +89,8 @@ import java.util.Map;
 import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
-import bit.facetracker.model.Result;
+import bit.facetracker.model.FaceDetectResult;
+import bit.facetracker.model.FaceModel;
 import bit.facetracker.tools.Blur;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.tools.ToastUtils;
@@ -231,6 +235,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     volatile BitmapDrawable mBackgroundDrawable;
 
     AnimatorSet mSelfAvatarSet;
+
+    volatile FaceDetectResult mResult = null;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -422,7 +428,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
         startTimer();
-
+        LogUtils.d("MAC",getMacAddress());
 
 
 
@@ -672,13 +678,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
         GraphicFaceTracker(GraphicOverlay overlay) {
             mOverlay = overlay;
-            mFaceGraphic = new FaceGraphicMove(overlay);
-            mFaceGraphic.setScanBodyCompleteListener(new FaceGraphicMove.ScanBodyCompleteListener() {
-                @Override
-                public void complete() {
-                    startDisplay();
-                }
-            });
         }
 
         /**
@@ -687,7 +686,28 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         public void onNewItem(int faceId, Face item) {
 
+            LogUtils.d("onNewItem","faceId = " + faceId);
             //TODO  split face
+            mOverlay.clear();
+
+            mFaceGraphic = new FaceGraphicMove(mOverlay);
+            mFaceGraphic.setScanBodyCompleteListener(new FaceGraphicMove.ScanBodyCompleteListener() {
+                @Override
+                public void complete() {
+
+                    mFaceGraphic.acclerateSpeed();
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    startDisplay();
+                }
+            });
+
+
             FaceContainer container = new FaceContainer(item);
             mDetectedFaces.put(faceId, container);
             mFaceGraphic.setId(faceId);
@@ -748,6 +768,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 }
             }
 
+            mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
         }
 
@@ -769,7 +790,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
             if (mIsGetBitmap) {
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -793,8 +813,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         camera.release();
     }
 
-    public void detectorface(String path) {
-        FaceDetectorJob job = new FaceDetectorJob(path);
+    public void detectorface(String path,String facilityId,String faceRect) {
+        FaceDetectorJob job = new FaceDetectorJob(path,facilityId,faceRect);
         AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
@@ -921,12 +941,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         protected void onPostExecute(String file) {
             super.onPostExecute(file);
-
-            // TEST
-            mIsGetDetectResult = true;
-            mFaceGraphic.setScanBody(mIsGetDetectResult);
-
-            detectorface(file);
+            startDisplay();
+            detectorface(file, getMacAddress(),getFaceRect(mCurrentGotFace));
         }
 
         private Bitmap getBitmap(Frame frame) {
@@ -950,21 +966,19 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(Result result) {
-        if (result != null && mIsGetBitmap) {
+    public void onEvent(FaceDetectResult result) {
+        if (result != null && result.code.equals("200") && mIsGetBitmap) {
 
-            if (result.face_num > 0) {
-                // TODO facenum >= 1
+            if (result.result != null && result.result.face.face_num > 0) {
+                mResult = result;
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
-
-
-
             } else {
                 ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
             }
 
-
+        }else {
+            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
         }
     }
 
@@ -1025,6 +1039,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mIsGetBitmap = false;
         mIsGetDetectResult = false;
         mCurrentGotFace = null;
+        mResult = null;
+        if(mFaceGraphic != null)
+        mFaceGraphic.resetSpeed();
 
     }
 
@@ -1136,7 +1153,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private void startDisplay() {
 
         mFirstResult.setVisibility(View.VISIBLE);
-
+        mSelfAvatar.setImageURI("file://" + CAPTURECROPIMGPATH);
+        BlurBackgourndTask blurBackgourndTask = new BlurBackgourndTask();
+        blurBackgourndTask.start();
         TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE,mCurrentGotFace.getPosition().x-288, Animation.ABSOLUTE,0, Animation.ABSOLUTE,mCurrentGotFace.getPosition().y-250,Animation.ABSOLUTE,0);
         transformation.setDuration(1000);
         transformation.setFillAfter(true);
@@ -1168,5 +1187,46 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     }
 
+    private String getFaceRect(Face face) {
+        if (face != null) {
+            StringBuilder builder = new StringBuilder("");
+            return  builder.append(face.getPosition().x).append(",").append(face.getPosition().y).append(",").append(face.getWidth()).append(",").append(face.getHeight()).toString();
+        }
+        return null;
+    }
+
+    public String getMacAddress() {
+        Enumeration<NetworkInterface> interfaces = null;
+        try {
+            interfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface iF = interfaces.nextElement();
+
+            byte[] addr = new byte[0];
+            try {
+                addr = iF.getHardwareAddress();
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+            if (addr == null || addr.length == 0) {
+                continue;
+            }
+
+            StringBuilder buf = new StringBuilder();
+            for (byte b : addr) {
+                buf.append(String.format("%02X:", b));
+            }
+            if (buf.length() > 0) {
+                buf.deleteCharAt(buf.length() - 1);
+            }
+            String mac = buf.toString();
+            return  mac;
+        }
+
+        return "";
+    }
 
 }

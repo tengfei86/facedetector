@@ -7,7 +7,7 @@ import java.util.List;
  * Created by blade on 08/01/2017.
  */
 
-public class Result implements Serializable{
+public class FaceModel implements Serializable {
     public Attribute attributes;
     public String name;
     public CellImage cel_image;

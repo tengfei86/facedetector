@@ -18,7 +18,6 @@ package bit.facetracker.ui;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -27,7 +26,6 @@ import android.text.TextPaint;
 
 import com.google.android.gms.vision.face.Face;
 
-import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.GraphicOverlay;
 
 /**
@@ -39,7 +37,7 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
     private volatile float progress = 0.0f;
     private float rectBand = 10.0f;
     private float OFFSET = (float) (1.0 / 8);
-    private int LOOPCOUNT = 2;
+    private int mLoopCount = 2;
     private static final int COLOR_CHOICES[] = {
             Color.BLUE,
             Color.CYAN,
@@ -135,12 +133,12 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
         if (face == null) {
             return;
         }
-        for (int i = 0; i < LOOPCOUNT; i++) {
+        for (int i = 0; i < mLoopCount; i++) {
 
             updateProgress();
 
             float originalX = scaleX(face.getPosition().x);
-            float originalY = scaleY(face.getPosition().y);
+            float originalY = scaleX(face.getPosition().y);
 
             fullwidth = scaleX(face.getWidth());
             fullheight = scaleY(face.getHeight());
@@ -194,22 +192,22 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
                     float x = originX + rectProgressX;
                     float y = originY;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectWidth, startDrawPoint[i].y + rectBand);
+                    commonRectF.set(point.x, point.y, point.x + rectWidth, point.y + rectBand);
                 } else if (i == 1) {
                     float x = originX + fullwidth - rectBand;
                     float y = originY + rectProgressY;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectBand, startDrawPoint[i].y + rectHeight);
+                    commonRectF.set(point.x, point.y, point.x + rectBand, point.y + rectHeight);
                 } else if (i == 2) {
                     float x = originX + (fullwidth - rectWidth - rectProgressX);
                     float y = originY + fullheight - rectBand;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectWidth, startDrawPoint[i].y + rectBand);
+                    commonRectF.set(point.x, point.y, point.x + rectWidth, point.y + rectBand);
                 } else {
                     float x = originX;
                     float y = originY + (fullheight - rectHeight - rectProgressY);
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectBand, startDrawPoint[i].y + rectHeight);
+                    commonRectF.set(point.x, point.y, point.x + rectBand, point.y + rectHeight);
                 }
                 canvas.drawRect(commonRectF, paint);
 
@@ -228,22 +226,22 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
                     float x = originX + (fullwidth - rectWidth - rectProgressX);
                     float y = originY;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectWidth, startDrawPoint[i].y + rectBand);
+                    commonRectF.set(point.x, point.y, point.x + rectWidth, point.y + rectBand);
                 } else if (i == 1) {
                     float x = originX + fullwidth - rectBand;
                     float y = originY + (fullheight - rectHeight - rectProgressY);
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectBand, startDrawPoint[i].y + rectHeight);
+                    commonRectF.set(point.x, point.y, point.x + rectBand, point.y + rectHeight);
                 } else if (i == 2) {
                     float x = originX + rectProgressX;
                     float y = originY + fullheight - rectBand;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectWidth, startDrawPoint[i].y + rectBand);
+                    commonRectF.set(point.x, point.y, point.x + rectWidth, point.y + rectBand);
                 } else {
                     float x = originX;
                     float y = originY + rectProgressY;
                     point.set(x, y);
-                    commonRectF.set(startDrawPoint[i].x, startDrawPoint[i].y, startDrawPoint[i].x + rectBand, startDrawPoint[i].y + rectHeight);
+                    commonRectF.set(point.x, point.y, point.x + rectBand, point.y + rectHeight);
                 }
                 canvas.drawRect(commonRectF, paint);
 
@@ -300,6 +298,19 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
         void complete();
     }
 
+    public  void setLoopCount(int loopCount) {
+        if (loopCount > 0) {
+            this.mLoopCount = loopCount;
+        }
+    }
+
+    public synchronized void acclerateSpeed() {
+        setLoopCount(10);
+    }
+
+    public synchronized void resetSpeed() {
+        setLoopCount(2);
+    }
 
 
 }

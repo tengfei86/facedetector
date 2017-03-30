@@ -3,9 +3,13 @@ package bit.facetracker.job;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import bit.facetracker.constant.RequestParamers;
 import bit.facetracker.constant.URL;
-import bit.facetracker.model.Result;
+import bit.facetracker.model.FaceDetectResult;
+import bit.facetracker.model.FaceModel;
 import bit.facetracker.tools.GsonUtils;
 import bit.facetracker.tools.HttpUtils;
 import bit.facetracker.tools.LogUtils;
@@ -17,16 +21,25 @@ import bit.facetracker.tools.LogUtils;
 public class FaceDetectorJob extends BaseJob {
 
     String filePath;
-    public FaceDetectorJob(String filepath) {
+    String facilityId;
+    String faceRect;
+
+
+    public FaceDetectorJob(String filepath,String faceRect,String facilityId) {
         this.filePath = filepath;
+        this.faceRect = faceRect;
+        this.facilityId = facilityId;
     }
 
     @Override
     public void onRun() throws Throwable {
         super.onRun();
         File file = new File(filePath);
-        String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, null, "img_file", file);
-        Result resultObj = GsonUtils.fromJson(result, Result.class);
+        Map<String, String> params = new HashMap<>();
+        params.put(RequestParamers.FaceDetector.FACILITYID,facilityId);
+        params.put(RequestParamers.FaceDetector.FACERECT,faceRect);
+        String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, null, "image", file);
+        FaceDetectResult resultObj = GsonUtils.fromJson(result, FaceDetectResult.class);
         EventBus.getDefault().post(resultObj);
         LogUtils.d("FaceDetecor", "result = "  + result);
     }

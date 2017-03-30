@@ -10,4 +10,9 @@ public class RequestParamers {
          String GENDER = "gender";
      }
 
+     public interface FaceDetector {
+         String FACILITYID = "facilityId";
+         String FACERECT = "faceRect";
+     }
+
 }

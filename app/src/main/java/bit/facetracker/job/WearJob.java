@@ -2,13 +2,11 @@ package bit.facetracker.job;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import bit.facetracker.constant.RequestParamers;
 import bit.facetracker.constant.URL;
-import bit.facetracker.model.Result;
 import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.GsonUtils;
 import bit.facetracker.tools.HttpUtils;

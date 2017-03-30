@@ -79,7 +79,7 @@ import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
 import bit.facetracker.job.WearJob;
-import bit.facetracker.model.Result;
+import bit.facetracker.model.FaceModel;
 import bit.facetracker.model.WearResult;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.tools.ToastUtils;
@@ -722,7 +722,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     }
 
     public void detectorface(String path) {
-        FaceDetectorJob job = new FaceDetectorJob(path);
+        FaceDetectorJob job = new FaceDetectorJob(path,"","");
         AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
@@ -854,7 +854,7 @@ public final class FaceTrackerActivity extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(Result result) {
+    public void onEvent(FaceModel result) {
         if (result != null && mIsGetBitmap) {
 
             if (result.face_num > 0) {
