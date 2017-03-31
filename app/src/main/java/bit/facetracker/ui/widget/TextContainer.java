@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -62,7 +63,7 @@ public class TextContainer extends LinearLayout {
         }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0.0f, (float) (TIMEOFFSET * PERCENT * getChildCount() - 1) + TIMEOFFSET);
-        animator.setDuration(500);
+        animator.setDuration(1500);
 
         CustomListAnimatorListener listAnimatorListener = new CustomListAnimatorListener(getChildCount(), TIMEOFFSET);
         animator.addUpdateListener(listAnimatorListener);
@@ -140,6 +141,20 @@ public class TextContainer extends LinearLayout {
         }
 
     }
+
+
+    CountDownTimer time = new CountDownTimer(1000,5) {
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+        }
+
+        @Override
+        public void onFinish() {
+
+        }
+    };
 
 
 }

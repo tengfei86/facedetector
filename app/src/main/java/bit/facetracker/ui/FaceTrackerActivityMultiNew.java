@@ -64,6 +64,7 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.wonderkiln.blurkit.BlurKit;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -138,6 +139,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     private Handler mHandler;
     private static final Integer HANDLER_RENDER_BLURBACKGROUND = 1;
+    private static final Integer HANDLER_STARTDISPLAY = 2;
 
     public Map<Integer, FaceContainer> mDetectedFaces = new HashMap<>();
 
@@ -202,6 +204,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
     // second result
+
+    @BindView(R.id.title)
+    TextContainer mTitle;
+
     @BindView(R.id.image_main)
     CustomDraweeView mMainImage;
 
@@ -277,7 +283,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                     }
                 } else if (msg.what == HANDLER_RENDER_BLURBACKGROUND) {
-                    mBlurBackground.setBackground(mBackgroundDrawable);
+
+                    mBlurBackground.setBackground(new BitmapDrawable((Bitmap)msg.obj));
+                } else if (msg.what == HANDLER_STARTDISPLAY) {
+                    startDisplay();
                 }
             }
         };
@@ -692,16 +701,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             mFaceGraphic.setScanBodyCompleteListener(new FaceGraphicMove.ScanBodyCompleteListener() {
                 @Override
                 public void complete() {
-
                     mFaceGraphic.acclerateSpeed();
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    startDisplay();
+                    mHandler.sendEmptyMessageDelayed(HANDLER_STARTDISPLAY,3000);
                 }
             });
 
@@ -935,25 +936,28 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             detectorface(file, getMacAddress(),getFaceRect(mCurrentGotFace));
         }
 
-        private Bitmap getBitmap(Frame frame) {
-            ByteBuffer byteBuffer = frame.getGrayscaleImageData();
-            byte[] bytes = byteBuffer.array();
-            int w = frame.getMetadata().getWidth();
-            int h = frame.getMetadata().getHeight();
 
-            YuvImage yuvimage=new YuvImage(bytes, ImageFormat.NV21, w, h, null);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
-            byte[] jpegArray = baos.toByteArray();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);
-
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-            Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-            return disbitmap;
-        }
     }
+
+    private Bitmap getBitmap(Frame frame) {
+        ByteBuffer byteBuffer = frame.getGrayscaleImageData();
+        byte[] bytes = byteBuffer.array();
+        int w = frame.getMetadata().getWidth();
+        int h = frame.getMetadata().getHeight();
+
+        YuvImage yuvimage=new YuvImage(bytes, ImageFormat.NV21, w, h, null);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
+        byte[] jpegArray = baos.toByteArray();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        return disbitmap;
+    }
+
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(FaceDetectResult result) {
@@ -1074,6 +1078,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mSecondResult.setVisibility(View.VISIBLE);
                 animationView2.setVisibility(View.VISIBLE);
                 animationView.setVisibility(View.GONE);
+                mTitle.setDisplayText(getString(R.string.label_displaysecondtitle));
                 animationView2.playAnimation();
             }
 
@@ -1121,23 +1126,29 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     class BlurBackgourndTask extends Thread {
 
+        Bitmap mBitmapBlur;
         @Override
         public void run() {
             super.run();
             int count = 0;
-            while (!isInterrupted() && count <= 5) {
+            while (!isInterrupted() && count < 1) {
 
-                if (mFrameToBlur != null) {
-                    mBackgroundDrawable =  mBlurTools.blur(mFrameToBlur,count + 1,25f);
-                    count++;
-                }
+//                if (mFrameToBlur != null) {
+//                    mBackgroundDrawable =  mBlurTools.blur(mFrameToBlur,count + 1,25f);
+//                    count++;
+//                }
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                if(mBitmapBlur == null)
+                mBitmapBlur  = getBitmap(mFrameToBlur);
+
+                count++;
                 mHandler.removeMessages(HANDLER_RENDER_BLURBACKGROUND);
-                mHandler.sendEmptyMessage(HANDLER_RENDER_BLURBACKGROUND);
+                mHandler.sendMessage(mHandler.obtainMessage(HANDLER_RENDER_BLURBACKGROUND,BlurKit.getInstance().blur(mBitmapBlur,25)));
+
             }
         }
     }

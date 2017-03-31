@@ -147,5 +147,6 @@
     <string name="label_displayattractive">颜值</string>
     <string name="label_displayage">潮龄</string>
     <string name="label_displaycharm">魅力</string>
+    <string name="label_displaysecondtitle">佩罗为你推荐以下穿搭</string>
 
 </resources>

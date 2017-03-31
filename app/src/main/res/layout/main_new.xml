@@ -195,6 +195,7 @@
 
         <bit.facetracker.ui.widget.TextContainer
             android:id="@+id/title"
+            android:layout_marginLeft="200px"
             android:layout_width="675px"
             android:layout_height="55px"/>
 

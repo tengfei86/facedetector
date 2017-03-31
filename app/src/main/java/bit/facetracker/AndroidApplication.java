@@ -7,6 +7,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.facebook.stetho.Stetho;
+import com.wonderkiln.blurkit.BlurKit;
 
 import bit.facetracker.manager.JobQueueManager;
 import bit.facetracker.manager.PreferenceManager;
@@ -31,6 +32,8 @@ public class AndroidApplication extends Application {
         if (isDebug()) {
             Stetho.initializeWithDefaults(sInstance);
         }
+
+        BlurKit.init(this);
     }
 
     private void initFresco() {
