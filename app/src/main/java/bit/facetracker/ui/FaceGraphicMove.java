@@ -26,6 +26,7 @@ import android.text.TextPaint;
 
 import com.google.android.gms.vision.face.Face;
 
+import bit.facetracker.tools.LogUtils;
 import bit.facetracker.ui.camera.GraphicOverlay;
 
 /**
@@ -129,30 +130,30 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
      */
     @Override
     public void draw(Canvas canvas) {
+
+
+
         Face face = mFace;
         if (face == null) {
             return;
         }
+        float originalX = scaleX(face.getPosition().x);
+        float originalY = scaleX(face.getPosition().y);
+
+        fullwidth = scaleX(face.getWidth());
+        fullheight = scaleY(face.getHeight());
+
+        float xOffset = scaleX(face.getWidth() * mNormalRectOffsetRatio);
+        float yOffset = scaleY(face.getHeight() * mNormalRectOffsetRatio);
+
         for (int i = 0; i < mLoopCount; i++) {
-
             updateProgress();
-
-            float originalX = scaleX(face.getPosition().x);
-            float originalY = scaleX(face.getPosition().y);
-
-            fullwidth = scaleX(face.getWidth());
-            fullheight = scaleY(face.getHeight());
-
-            float xOffset = scaleX(face.getWidth() * mNormalRectOffsetRatio);
-            float yOffset = scaleY(face.getHeight() * mNormalRectOffsetRatio);
-
             drawRect(canvas, mBoxPaint, originalX, originalY, xOffset, yOffset, progress);
+        }
 
-            if (mIsScanBody) {
-                float xScanBodyOffset = scaleX(face.getWidth() * mScanBodyRectOffsetRatio);
-                drawScanBodyRect(canvas, mBoxPaint, originalX, originalY,xScanBodyOffset,mScanBodyProgress, fullheight, fullwidth);
-            }
-
+        if (mIsScanBody) {
+            float xScanBodyOffset = scaleX(face.getWidth() * mScanBodyRectOffsetRatio);
+            drawScanBodyRect(canvas, mBoxPaint, originalX, originalY,xScanBodyOffset,mScanBodyProgress, fullheight, fullwidth);
         }
 
     }
