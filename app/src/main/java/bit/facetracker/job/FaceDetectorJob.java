@@ -48,7 +48,7 @@ public class FaceDetectorJob extends BaseJob {
             EventBus.getDefault().post(resultObj);
             LogUtils.d("FaceDetecor", "result = "  + result);
         } else {
-            
+
         }
     }
 
