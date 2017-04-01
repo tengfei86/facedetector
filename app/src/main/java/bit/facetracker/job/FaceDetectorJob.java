@@ -47,13 +47,14 @@ public class FaceDetectorJob extends BaseJob {
         if (resultObj != null) {
             EventBus.getDefault().post(resultObj);
             LogUtils.d("FaceDetecor", "result = "  + result);
-        }else {
-
+        } else {
+            
         }
     }
 
     @Override
     protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
-        return null;
+        RetryConstraint constraint = new RetryConstraint(false);
+        return constraint;
     }
 }
