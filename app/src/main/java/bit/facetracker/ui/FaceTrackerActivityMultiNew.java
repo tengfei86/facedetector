@@ -292,9 +292,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     startDisplay();
                 } else if (msg.what == HANDLE_DISPLAYSUIT) {
 
-                    LogUtils.d("DISPLAY","mCurrentSuitsIndex = " + mCurrentSuitsIndex);
-                    LogUtils.d("DISPLAY","size = " + mResult.result.fashion.suits.size());
-
                     if (mResult != null && mResult.result != null && mResult.result.fashion.suits.size() > 0) {
                         mMainImage.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).url);
                         mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
@@ -303,8 +300,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
                     }
 
-                    mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
-                    mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
+                    if (mResult != null) {
+                        mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
+                        mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
+                    }
                 }
             }
         };
@@ -450,18 +449,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             }
         });
 
-
         startTimer();
-        LogUtils.d("MAC",getMacAddress());
-
-
-
-//        startDisplay();
-
-//        BlurBackgourndTask taskblur = new BlurBackgourndTask();
-//        taskblur.start();
-
-//        mBlurBackground.setBackgroundResource(R.drawable.blur_background);
 
     }
 
@@ -1048,11 +1036,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mIsGetBitmap = false;
         mIsGetDetectResult = false;
         mCurrentGotFace = null;
-        mResult = null;
         if(mFaceGraphic != null)
         mFaceGraphic.resetSpeed();
-        mCurrentSuitsIndex = 0;
         mHandler.removeMessages(HANDLER_STARTDISPLAY);
+        mCurrentSuitsIndex = 0;
+        mResult = null;
 
     }
 
