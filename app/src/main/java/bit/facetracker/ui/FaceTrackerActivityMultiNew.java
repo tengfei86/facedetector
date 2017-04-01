@@ -539,8 +539,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1280,720)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
-                .setRequestedFps(30.0f)
+                .setFacing(0)
+                .setRequestedFps(20.0f)
                 .build();
 
         Log.d("NavBar","result = " + hasNavBar(getResources()));
@@ -801,15 +801,15 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
          */
         @Override
         public void onDone() {
-//            mOverlay.remove(mFaceGraphic);
-//            if (mIsGetBitmap) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        init();
-//                    }
-//                });
-//            }
+            mOverlay.remove(mFaceGraphic);
+            if (mIsGetBitmap) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        init();
+                    }
+                });
+            }
 
         }
 
