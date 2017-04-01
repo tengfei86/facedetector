@@ -1,5 +1,9 @@
 package bit.facetracker.job;
 
+import android.support.annotation.NonNull;
+
+import com.birbit.android.jobqueue.RetryConstraint;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
@@ -38,13 +42,18 @@ public class FaceDetectorJob extends BaseJob {
         Map<String, String> params = new HashMap<>();
         params.put(RequestParamers.FaceDetector.FACILITYID,facilityId);
         params.put(RequestParamers.FaceDetector.FACERECT,faceRect);
-        String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, null, "image", file);
+        String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, params, "image", file);
         FaceDetectResult resultObj = GsonUtils.fromJson(result, FaceDetectResult.class);
         if (resultObj != null) {
             EventBus.getDefault().post(resultObj);
             LogUtils.d("FaceDetecor", "result = "  + result);
         }else {
-            EventBus.getDefault().post(new FaceDetectResult());
+
         }
+    }
+
+    @Override
+    protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
+        return null;
     }
 }

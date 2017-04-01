@@ -120,6 +120,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int RC_HANDLE_EXTERNAL = 3;
 
+
     private int mScreenWidth = 1080;
 
     public volatile  boolean mIsGetBitmap;
@@ -140,6 +141,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private Handler mHandler;
     private static final Integer HANDLER_RENDER_BLURBACKGROUND = 1;
     private static final Integer HANDLER_STARTDISPLAY = 2;
+    private static final Integer HANDLE_DISPLAYSUIT = 3;
 
     public Map<Integer, FaceContainer> mDetectedFaces = new HashMap<>();
 
@@ -243,6 +245,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     AnimatorSet mSelfAvatarSet;
 
     volatile FaceDetectResult mResult = null;
+    volatile int mCurrentSuitsIndex = 0;
 
     /**
      * Initializes the UI and initiates the creation of a face detector.
@@ -287,6 +290,21 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     mBlurBackground.setBackground(new BitmapDrawable((Bitmap)msg.obj));
                 } else if (msg.what == HANDLER_STARTDISPLAY) {
                     startDisplay();
+                } else if (msg.what == HANDLE_DISPLAYSUIT) {
+
+                    LogUtils.d("DISPLAY","mCurrentSuitsIndex = " + mCurrentSuitsIndex);
+                    LogUtils.d("DISPLAY","size = " + mResult.result.fashion.suits.size());
+
+                    if (mResult != null && mResult.result != null && mResult.result.fashion.suits.size() > 0) {
+                        mMainImage.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).url);
+                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
+                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
+                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(2).url);
+                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
+                    }
+
+                    mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
+                    mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
                 }
             }
         };
@@ -312,34 +330,32 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             LogUtils.d("animator", "time = " + animation.getCurrentPlayTime());
             if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
                 mIsMarked.put(TIME_DISPLAYATTATIVE, true);
-                mAttractiveProgressView.setMaxProgress(0.7f);
+                mAttractiveProgressView.setMaxProgress((float)(mResult.result.face.attributes.attractive * 0.01));
                 mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
-                mSelfAvatar.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490460448295&di=8c0cabacc4d5fa33ca680fe6f02d5a08&imgtype=0&src=http%3A%2F%2Fhiphotos.baidu.com%2Ftcoh%2Fpic%2Fitem%2Fffa39b25a7fbf33f908f9d7f.jpg%3Fv%3Dtbs");
             }
 
             if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
                 mIsMarked.put(TIME_DISPLAYAGE, true);
-                mAgeProgressView.setMaxProgress(0.5f);
+                mAgeProgressView.setMaxProgress((float)(mResult.result.face.attributes.age * 0.01));
                 mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
-                mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490461006594&di=1fee390ec7b8cf488a0e0623455a0f8e&imgtype=0&src=http%3A%2F%2Fa.hiphotos.baidu.com%2Fzhidao%2Fpic%2Fitem%2F342ac65c103853438b3c5f8b9613b07ecb8088ad.jpg");
             }
 
             if (animation.getCurrentPlayTime() >= TIME_DISPLAYCHARM && !mIsMarked.get(TIME_DISPLAYCHARM)) {
                 mIsMarked.put(TIME_DISPLAYCHARM, true);
-                mCharmProgressView.setMaxProgress(0.2f);
+                mCharmProgressView.setMaxProgress((float)Math.random());
                 mCharmTextContainer.setDisplayText(getString(R.string.label_displaycharm));
             }
 
             if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
                 mIsMarked.put(TIME_MATCHSTARIMAGE, true);
                 mStarView.setVisibility(View.VISIBLE);
-                mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490524083796&di=03286777e18a55b3e39e4a66dd8f0992&imgtype=0&src=http%3A%2F%2Fscimg.jb51.net%2Ftouxiang%2F201703%2F2017032517032229.jpg");
+                mStarView.setImageURI(mResult.result.face.cel_image.thumbnail);
             }
 
 
             if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
                 mIsMarked.put(TIME_MATCHSTARNAME, true);
-                mMatchStartTextContainer.setDisplayText("撞脸明星 方大同");
+                mMatchStartTextContainer.setDisplayText("撞脸明星 " + mResult.result.face.name);
             }
 
 
@@ -362,7 +378,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mStarView.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490461341161&di=f3fdb65d26887946104e893855c3bcb6&imgtype=0&src=http%3A%2F%2Fcdnq.duitang.com%2Fuploads%2Fitem%2F201412%2F30%2F20141230085749_tr24F.jpeg");
 
             }
 
@@ -382,32 +397,32 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
                 mImageMarked.put(TIME_IMAGEMAIN, true);
                 mMainImage.setVisibility(View.VISIBLE);
-                mMainImage.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490512396376&di=bdbb723411b0ab542ae61f036cef315e&imgtype=0&src=http%3A%2F%2Fpic36.photophoto.cn%2F20150707%2F0047045135399298_b.jpg");
+                mMainImage.setImageURI(mResult.result.fashion.suits.get(0).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
                 mImageMarked.put(TIME_IMAGESIDE1, true);
 
                 mSide1Image.setVisibility(View.VISIBLE);
-                mSide1Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520865259&di=116bf1d4c4673b755a46c440e079f345&imgtype=0&src=http%3A%2F%2Ffile06.16sucai.com%2F2016%2F0921%2Fda78bbfe5a27798a8d300f30d5ad594e.jpg");
+                mSide1Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(0).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
                 mImageMarked.put(TIME_IMAGESIDE2, true);
                 mSide2Image.setVisibility(View.VISIBLE);
-                mSide2Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1490520885166&di=a09e54d037b48b201b5667118cf99981&imgtype=0&src=http%3A%2F%2Ftupian.enterdesk.com%2F2015%2Fxll%2F05%2F8%2Fstar29.jpg");
+                mSide2Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(1).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
                 mImageMarked.put(TIME_IMAGESIDE3, true);
                 mSide3Image.setVisibility(View.VISIBLE);
-                mSide3Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510814&di=9f9ddb699f4c03feffeb03cb71d48efa&src=http://img02.tooopen.com/images/20150703/tooopen_sy_132761691991.jpg");
+                mSide3Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(2).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
                 mImageMarked.put(TIME_IMAGESIDE4, true);
                 mSide4Image.setVisibility(View.VISIBLE);
-                mSide4Image.setImageURI("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1490510837&di=a6c87767b4eb689df8396c57796d2111&src=http://5.66825.com/download/pic/000/326/d7b6e3f5f063dfbeec1635627988aa48.jpg");
+                mSide4Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(3).url);
             }
 
         });
@@ -420,8 +435,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-//                init();
-//                animationView.playAnimation();
+                mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
+                mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
             }
 
             @Override
@@ -786,15 +801,15 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
          */
         @Override
         public void onDone() {
-            mOverlay.remove(mFaceGraphic);
-            if (mIsGetBitmap) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        init();
-                    }
-                });
-            }
+//            mOverlay.remove(mFaceGraphic);
+//            if (mIsGetBitmap) {
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        init();
+//                    }
+//                });
+//            }
 
         }
 
@@ -961,25 +976,21 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(FaceDetectResult result) {
-//        if (result != null && result.code.equals("200") && mIsGetBitmap) {
-//
-//            if (result.result != null && result.result.face.face_num > 0) {
-//                mResult = result;
-//                mIsGetDetectResult = true;
-//                mFaceGraphic.setScanBody(mIsGetDetectResult);
-//            } else {
-//                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
-//            }
-//
-//        }else {
-//            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
-//        }
+        if (result != null && result.code.equals("200") && mIsGetBitmap) {
 
-        // Test
-        mIsGetDetectResult = true;
-        mFaceGraphic.setScanBody(mIsGetDetectResult);
+            if (result.result != null && result.result.face.face_num > 0) {
+                mResult = result;
+                mIsGetDetectResult = true;
+                mFaceGraphic.setScanBody(mIsGetDetectResult);
+            } else {
+                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+            }
+
+        } else {
+            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+        }
+
     }
-
 
     class FaceContainer {
 
@@ -1040,6 +1051,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mResult = null;
         if(mFaceGraphic != null)
         mFaceGraphic.resetSpeed();
+        mCurrentSuitsIndex = 0;
+        mHandler.removeMessages(HANDLER_STARTDISPLAY);
 
     }
 
@@ -1096,6 +1109,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     }
 
     public void firstQuit() {
+
         mAttractiveTextContainer.setVisibility(View.INVISIBLE);
         mAgeTextContainer.setVisibility(View.INVISIBLE);
         mCharmTextContainer.setVisibility(View.INVISIBLE);

@@ -5,7 +5,7 @@ package bit.facetracker.constant;
  */
 
 public class URL {
-    public static final String BASEURL = "http://epsun.gnway.cc:9090/";
-    public static final String FACEDETECTORURL = BASEURL + "v1/celebrity/aio";
+    public static final String BASEURL = "http://222.223.208.2:9093/";
+    public static final String FACEDETECTORURL = BASEURL + "fashion.asp";
     public static final String WEARRESULT = "http://epsun.gnway.cc:8011/index_json.asp";
 }

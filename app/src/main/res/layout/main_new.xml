@@ -62,6 +62,8 @@
         <TextView
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:text="20℃"
             android:id="@+id/temperature"
             android:layout_width="200px"
             android:layout_height="200px"
