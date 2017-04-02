@@ -247,6 +247,14 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     volatile FaceDetectResult mResult = null;
     volatile int mCurrentSuitsIndex = 0;
 
+    public synchronized void setResult(FaceDetectResult result) {
+        this.mResult = result;
+    }
+
+    public synchronized FaceDetectResult getResult() {
+        return mResult;
+    }
+
     /**
      * Initializes the UI and initiates the creation of a face detector.
      */
@@ -292,16 +300,16 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     startDisplay();
                 } else if (msg.what == HANDLE_DISPLAYSUIT) {
 
-                    if (mResult != null && mResult.result != null && mResult.result.fashion.suits.size() > 0) {
-                        mMainImage.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).url);
-                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
-                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
-                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(2).url);
-                        mSide1Image.setImageURI(mResult.result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
+                    if (getResult() != null && getResult().result != null && getResult().result.fashion.suits.size() > 0) {
+                        mMainImage.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).url);
+                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
+                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
+                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(2).url);
+                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
                     }
 
-                    if (mResult != null) {
-                        mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
+                    if (getResult() != null) {
+                        mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
                         mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
                     }
                 }
@@ -329,13 +337,13 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             LogUtils.d("animator", "time = " + animation.getCurrentPlayTime());
             if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
                 mIsMarked.put(TIME_DISPLAYATTATIVE, true);
-                mAttractiveProgressView.setMaxProgress((float)(mResult.result.face.attributes.attractive * 0.01));
+                mAttractiveProgressView.setMaxProgress((float)(getResult().result.face.attributes.attractive * 0.01));
                 mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
             }
 
             if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
                 mIsMarked.put(TIME_DISPLAYAGE, true);
-                mAgeProgressView.setMaxProgress((float)(mResult.result.face.attributes.age * 0.01));
+                mAgeProgressView.setMaxProgress((float)(getResult().result.face.attributes.age * 0.01));
                 mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
             }
 
@@ -348,13 +356,13 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
                 mIsMarked.put(TIME_MATCHSTARIMAGE, true);
                 mStarView.setVisibility(View.VISIBLE);
-                mStarView.setImageURI(mResult.result.face.cel_image.thumbnail);
+                mStarView.setImageURI(getResult().result.face.cel_image.thumbnail);
             }
 
 
             if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
                 mIsMarked.put(TIME_MATCHSTARNAME, true);
-                mMatchStartTextContainer.setDisplayText("撞脸明星 " + mResult.result.face.name);
+                mMatchStartTextContainer.setDisplayText("撞脸明星 " + getResult().result.face.name);
             }
 
 
@@ -396,32 +404,32 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
                 mImageMarked.put(TIME_IMAGEMAIN, true);
                 mMainImage.setVisibility(View.VISIBLE);
-                mMainImage.setImageURI(mResult.result.fashion.suits.get(0).url);
+                mMainImage.setImageURI(getResult().result.fashion.suits.get(0).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
                 mImageMarked.put(TIME_IMAGESIDE1, true);
 
                 mSide1Image.setVisibility(View.VISIBLE);
-                mSide1Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(0).url);
+                mSide1Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(0).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
                 mImageMarked.put(TIME_IMAGESIDE2, true);
                 mSide2Image.setVisibility(View.VISIBLE);
-                mSide2Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(1).url);
+                mSide2Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(1).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
                 mImageMarked.put(TIME_IMAGESIDE3, true);
                 mSide3Image.setVisibility(View.VISIBLE);
-                mSide3Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(2).url);
+                mSide3Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(2).url);
             }
 
             if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
                 mImageMarked.put(TIME_IMAGESIDE4, true);
                 mSide4Image.setVisibility(View.VISIBLE);
-                mSide4Image.setImageURI(mResult.result.fashion.suits.get(0).items.get(3).url);
+                mSide4Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(3).url);
             }
 
         });
@@ -434,7 +442,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mCurrentSuitsIndex = ++mCurrentSuitsIndex % mResult.result.fashion.suits.size();
+                mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
                 mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
             }
 
@@ -967,7 +975,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         if (result != null && result.code.equals("200") && mIsGetBitmap) {
 
             if (result.result != null && result.result.face.face_num > 0) {
-                mResult = result;
+                setResult(result);
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
             } else {
@@ -989,9 +997,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         Face face  = null;
         int count  = 0;
     }
-
-
-
 
 
     private void init() {
@@ -1040,7 +1045,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mFaceGraphic.resetSpeed();
         mHandler.removeMessages(HANDLER_STARTDISPLAY);
         mCurrentSuitsIndex = 0;
-        mResult = null;
+        setResult(null);
 
     }
 
