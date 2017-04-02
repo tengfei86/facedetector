@@ -238,8 +238,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @BindView(R.id.blur_background)
     FrameLayout mBlurBackground;
 
-    Blur mBlurTools;
-
     volatile BitmapDrawable mBackgroundDrawable;
 
     AnimatorSet mSelfAvatarSet;
@@ -317,20 +315,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         };
 
         ButterKnife.bind(this);
-
-        mBlurTools = new Blur(this, mBlurBackground,5.0f,25f);
-
         init();
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN  | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(uiOptions);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-//        animationView.playAnimation();
 
         animationView.addAnimatorUpdateListener((animation -> {
 
@@ -588,7 +576,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             mCameraSource.release();
         }
         mTimer.cancel();
-        mBlurTools.destroyTs();
         EventBus.getDefault().unregister(this);
     }
 
