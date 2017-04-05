@@ -123,8 +123,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     private int mScreenWidth = 1080;
 
-    public volatile  boolean mIsGetBitmap;
-    public volatile  boolean mIsGetDetectResult;
+    public volatile boolean mIsGetBitmap;
+    public volatile boolean mIsGetDetectResult;
 
 
     private volatile Face mFace;
@@ -146,7 +146,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     public Map<Integer, FaceContainer> mDetectedFaces = new HashMap<>();
 
     public Face mCurrentGotFace = null;
-
 
 
     // new
@@ -264,7 +263,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
 
 
-        LogUtils.e("AndroidRuntime","dpi ="  + getResources().getDisplayMetrics().densityDpi);
+        LogUtils.e("AndroidRuntime", "dpi =" + getResources().getDisplayMetrics().densityDpi);
 
         Display display = getWindowManager().getDefaultDisplay();
         mScreenWidth = display.getWidth();
@@ -287,13 +286,13 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 super.handleMessage(msg);
 
                 if (msg.what == 0) {
-                    if(mIsGetBitmap) {
+                    if (mIsGetBitmap) {
                         LogUtils.d("Count", "restart set");
 
                     }
                 } else if (msg.what == HANDLER_RENDER_BLURBACKGROUND) {
 
-                    mBlurBackground.setBackground(new BitmapDrawable((Bitmap)msg.obj));
+                    mBlurBackground.setBackground(new BitmapDrawable((Bitmap) msg.obj));
                 } else if (msg.what == HANDLER_STARTDISPLAY) {
                     startDisplay();
                 } else if (msg.what == HANDLE_DISPLAYSUIT) {
@@ -317,52 +316,55 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         ButterKnife.bind(this);
         init();
         View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN  | View.SYSTEM_UI_FLAG_IMMERSIVE;
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(uiOptions);
 
         animationView.addAnimatorUpdateListener((animation -> {
 
             LogUtils.d("animator", "time = " + animation.getCurrentPlayTime());
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
-                mIsMarked.put(TIME_DISPLAYATTATIVE, true);
-                mAttractiveProgressView.setMaxProgress((float)(getResult().result.face.attributes.attractive * 0.01));
-                mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
-            }
-
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
-                mIsMarked.put(TIME_DISPLAYAGE, true);
-                mAgeProgressView.setMaxProgress((float)(getResult().result.face.attributes.age * 0.01));
-                mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
-            }
-
-            if (animation.getCurrentPlayTime() >= TIME_DISPLAYCHARM && !mIsMarked.get(TIME_DISPLAYCHARM)) {
-                mIsMarked.put(TIME_DISPLAYCHARM, true);
-                mCharmProgressView.setMaxProgress((float)Math.random());
-                mCharmTextContainer.setDisplayText(getString(R.string.label_displaycharm));
-            }
-
-            if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
-                mIsMarked.put(TIME_MATCHSTARIMAGE, true);
-                mStarView.setVisibility(View.VISIBLE);
-                mStarView.setImageURI(getResult().result.face.cel_image.thumbnail);
-            }
 
 
-            if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
-                mIsMarked.put(TIME_MATCHSTARNAME, true);
-                mMatchStartTextContainer.setDisplayText("撞脸明星 " + getResult().result.face.name);
-            }
+            if (getResult() != null) {
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYATTATIVE && !mIsMarked.get(TIME_DISPLAYATTATIVE)) {
+                    mIsMarked.put(TIME_DISPLAYATTATIVE, true);
+                    mAttractiveProgressView.setMaxProgress((float) (getResult().result.face.attributes.attractive * 0.01));
+                    mAttractiveTextContainer.setDisplayText(getString(R.string.label_displayattractive));
+                }
+
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYAGE && !mIsMarked.get(TIME_DISPLAYAGE)) {
+                    mIsMarked.put(TIME_DISPLAYAGE, true);
+                    mAgeProgressView.setMaxProgress((float) (getResult().result.face.attributes.age * 0.01));
+                    mAgeTextContainer.setDisplayText(getString(R.string.label_displayage));
+                }
+
+                if (animation.getCurrentPlayTime() >= TIME_DISPLAYCHARM && !mIsMarked.get(TIME_DISPLAYCHARM)) {
+                    mIsMarked.put(TIME_DISPLAYCHARM, true);
+                    mCharmProgressView.setMaxProgress((float) Math.random());
+                    mCharmTextContainer.setDisplayText(getString(R.string.label_displaycharm));
+                }
+
+                if (animation.getCurrentPlayTime() >= TIME_MATCHSTARIMAGE && !mIsMarked.get(TIME_MATCHSTARIMAGE)) {
+                    mIsMarked.put(TIME_MATCHSTARIMAGE, true);
+                    mStarView.setVisibility(View.VISIBLE);
+                    mStarView.setImageURI(getResult().result.face.cel_image.thumbnail);
+                }
 
 
-            if (animation.getCurrentPlayTime() >= TIME_QUITFIRST && !mIsMarked.get(TIME_QUITFIRST)) {
-                mIsMarked.put(TIME_QUITFIRST, true);
-                firstQuit();
+                if (animation.getCurrentPlayTime() >= TIME_MATCHSTARNAME && !mIsMarked.get(TIME_MATCHSTARNAME)) {
+                    mIsMarked.put(TIME_MATCHSTARNAME, true);
+                    mMatchStartTextContainer.setDisplayText("撞脸明星 " + getResult().result.face.name);
+                }
+
+
+                if (animation.getCurrentPlayTime() >= TIME_QUITFIRST && !mIsMarked.get(TIME_QUITFIRST)) {
+                    mIsMarked.put(TIME_QUITFIRST, true);
+                    firstQuit();
+                }
+
             }
 
 
         }));
-
-
 
 
         animationView.addAnimatorListener(new Animator.AnimatorListener() {
@@ -387,37 +389,38 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             }
         });
 
-        animationView2.addAnimatorUpdateListener(animation ->  {
+        animationView2.addAnimatorUpdateListener(animation -> {
+            if (getResult() != null) {
+                if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
+                    mImageMarked.put(TIME_IMAGEMAIN, true);
+                    mMainImage.setVisibility(View.VISIBLE);
+                    mMainImage.setImageURI(getResult().result.fashion.suits.get(0).url);
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_IMAGEMAIN && !mImageMarked.get(TIME_IMAGEMAIN)) {
-                mImageMarked.put(TIME_IMAGEMAIN, true);
-                mMainImage.setVisibility(View.VISIBLE);
-                mMainImage.setImageURI(getResult().result.fashion.suits.get(0).url);
-            }
+                if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
+                    mImageMarked.put(TIME_IMAGESIDE1, true);
 
-            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE1 && !mImageMarked.get(TIME_IMAGESIDE1)) {
-                mImageMarked.put(TIME_IMAGESIDE1, true);
+                    mSide1Image.setVisibility(View.VISIBLE);
+                    mSide1Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(0).url);
+                }
 
-                mSide1Image.setVisibility(View.VISIBLE);
-                mSide1Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(0).url);
-            }
+                if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
+                    mImageMarked.put(TIME_IMAGESIDE2, true);
+                    mSide2Image.setVisibility(View.VISIBLE);
+                    mSide2Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(1).url);
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE2 && !mImageMarked.get(TIME_IMAGESIDE2)) {
-                mImageMarked.put(TIME_IMAGESIDE2, true);
-                mSide2Image.setVisibility(View.VISIBLE);
-                mSide2Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(1).url);
-            }
+                if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
+                    mImageMarked.put(TIME_IMAGESIDE3, true);
+                    mSide3Image.setVisibility(View.VISIBLE);
+                    mSide3Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(2).url);
+                }
 
-            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE3 && !mImageMarked.get(TIME_IMAGESIDE3)) {
-                mImageMarked.put(TIME_IMAGESIDE3, true);
-                mSide3Image.setVisibility(View.VISIBLE);
-                mSide3Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(2).url);
-            }
-
-            if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
-                mImageMarked.put(TIME_IMAGESIDE4, true);
-                mSide4Image.setVisibility(View.VISIBLE);
-                mSide4Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(3).url);
+                if (animation.getCurrentPlayTime() >= TIME_IMAGESIDE4 && !mImageMarked.get(TIME_IMAGESIDE4)) {
+                    mImageMarked.put(TIME_IMAGESIDE4, true);
+                    mSide4Image.setVisibility(View.VISIBLE);
+                    mSide4Image.setImageURI(getResult().result.fashion.suits.get(0).items.get(3).url);
+                }
             }
 
         });
@@ -430,8 +433,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
-                mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
+                if(getResult() != null) {
+                    mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
+                    mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
+                }
             }
 
             @Override
@@ -457,7 +462,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private void requestCameraPermission() {
         Log.w(TAG, "Camera permission is not granted. Requesting permission");
 
-        final String[] permissions = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.CAMERA)) {
@@ -521,18 +526,17 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
-                .setRequestedPreviewSize(1280,720)
+                .setRequestedPreviewSize(1280, 720)
                 .setAutoFocusEnabled(true)
                 .setFacing(0)
                 .setRequestedFps(20.0f)
                 .build();
 
-        Log.d("NavBar","result = " + hasNavBar(getResources()));
+        Log.d("NavBar", "result = " + hasNavBar(getResources()));
 
     }
 
-    public boolean hasNavBar (Resources resources)
-    {
+    public boolean hasNavBar(Resources resources) {
         int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
         return id > 0 && resources.getBoolean(id);
     }
@@ -700,7 +704,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 @Override
                 public void complete() {
                     mFaceGraphic.acclerateSpeed();
-                    mHandler.sendEmptyMessageDelayed(HANDLER_STARTDISPLAY,3000);
+                    mHandler.sendEmptyMessageDelayed(HANDLER_STARTDISPLAY, 3000);
                 }
             });
 
@@ -716,6 +720,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
          */
 
         long timestamp = System.currentTimeMillis();
+
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
 
@@ -724,8 +729,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             if (!mIsGetBitmap) {
 
-                float currentX  = (float)(face.getPosition().x + face.getWidth() / 2.0);
-                float currentY  = (float)(face.getPosition().y + face.getHeight() / 2.0);
+                float currentX = (float) (face.getPosition().x + face.getWidth() / 2.0);
+                float currentY = (float) (face.getPosition().y + face.getHeight() / 2.0);
 
                 float lastX = 0f;
                 float lastY = 0f;
@@ -734,7 +739,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                 if (mFace != null) {
                     lastX = (float) (mFace.getPosition().x + mFace.getWidth() / 2.0);
-                    lastY  = (float)(mFace.getPosition().y + mFace.getHeight() / 2.0);
+                    lastY = (float) (mFace.getPosition().y + mFace.getHeight() / 2.0);
                 }
 
 //                if(mFace != null) {
@@ -756,9 +761,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     mIsGetBitmap = true;
                     CAPTURECROPIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
                     CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "full" + "_" + "capture.png";
-                    LogUtils.d("Count","got it==============================");
+                    LogUtils.d("Count", "got it==============================");
 
-                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTURECROPIMGPATH,CAPTUREIMGPATH);
+                    CropPreviewFrame capturetask = new CropPreviewFrame(CAPTURECROPIMGPATH, CAPTUREIMGPATH);
                     capturetask.execute(mFrame);
 
                 }
@@ -803,14 +808,14 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         final Camera.Parameters params = camera.getParameters();
         final List<Camera.Size> sizes = params.getSupportedPreviewSizes();
         int length = sizes.size();
-        for(int i  = 0;i < length;i++) {
-           Log.d("PreviewList","height = " + sizes.get(i).height + " width = " + sizes.get(i).width);
+        for (int i = 0; i < length; i++) {
+            Log.d("PreviewList", "height = " + sizes.get(i).height + " width = " + sizes.get(i).width);
         }
         camera.release();
     }
 
-    public void detectorface(String path,String facilityId,String faceRect) {
-        FaceDetectorJob job = new FaceDetectorJob(path,facilityId,faceRect);
+    public void detectorface(String path, String facilityId, String faceRect) {
+        FaceDetectorJob job = new FaceDetectorJob(path, facilityId, faceRect);
         AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
@@ -840,14 +845,14 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
     }
 
-    class CropPreviewFrame extends AsyncTask<Frame,String,String> {
+    class CropPreviewFrame extends AsyncTask<Frame, String, String> {
 
         String filecroppath;
         String filefullpath;
 
-        public CropPreviewFrame(String filepath,String fullimagepath) {
+        public CropPreviewFrame(String filepath, String fullimagepath) {
             this.filecroppath = filepath;
-            this.filefullpath  = fullimagepath;
+            this.filefullpath = fullimagepath;
         }
 
         /**
@@ -872,8 +877,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 Bitmap bitmap = getBitmap(frame);
                 if (bitmap != null) {
 
-                    double x = Math.max(0,mFace.getPosition().x - 20);
-                    double y = Math.max(0,mFace.getPosition().y - 20);
+                    double x = Math.max(0, mFace.getPosition().x - 20);
+                    double y = Math.max(0, mFace.getPosition().y - 20);
 
                     double w = mFace.getWidth() + 40;
                     double h = mFace.getHeight() + 40;
@@ -894,7 +899,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         h = bitmap.getHeight() - y;
                     }
 
-                    final  Bitmap disbitmap = Bitmap.createBitmap(bitmap,(int)x,(int)y,(int)w,(int)h);
+                    final Bitmap disbitmap = Bitmap.createBitmap(bitmap, (int) x, (int) y, (int) w, (int) h);
                     File dir = new File(CAPTUREPATHDIR);
                     if (!dir.exists()) {
                         dir.mkdir();
@@ -903,7 +908,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     file = new File(filecroppath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                        disbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                        disbitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         outputStream.close();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -915,7 +920,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     file = new File(filefullpath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         outputStream.close();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -931,7 +936,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         protected void onPostExecute(String file) {
             super.onPostExecute(file);
-            detectorface(file, getMacAddress(),getFaceRect(mCurrentGotFace));
+            detectorface(file, getMacAddress(), getFaceRect(mCurrentGotFace));
         }
 
 
@@ -943,7 +948,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         int w = frame.getMetadata().getWidth();
         int h = frame.getMetadata().getHeight();
 
-        YuvImage yuvimage=new YuvImage(bytes, ImageFormat.NV21, w, h, null);
+        YuvImage yuvimage = new YuvImage(bytes, ImageFormat.NV21, w, h, null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
         byte[] jpegArray = baos.toByteArray();
@@ -966,11 +971,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
             } else {
-                ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+                ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
             }
 
         } else {
-            ToastUtils.showLong(this,"没毛病 ！ O(∩_∩)O ");
+            ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
         }
 
     }
@@ -981,8 +986,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             this.face = face;
         }
 
-        Face face  = null;
-        int count  = 0;
+        Face face = null;
+        int count = 0;
     }
 
 
@@ -1028,8 +1033,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mIsGetBitmap = false;
         mIsGetDetectResult = false;
         mCurrentGotFace = null;
-        if(mFaceGraphic != null)
-        mFaceGraphic.resetSpeed();
+        if (mFaceGraphic != null)
+            mFaceGraphic.resetSpeed();
         mHandler.removeMessages(HANDLER_STARTDISPLAY);
         mCurrentSuitsIndex = 0;
         setResult(null);
@@ -1037,17 +1042,16 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     }
 
 
-
     public void createQuitAnimationSet() {
-        ObjectAnimator selfAvatarAnimator = ObjectAnimator.ofFloat(mSelfAvatar,"alpha",1.0f,0.0f);
+        ObjectAnimator selfAvatarAnimator = ObjectAnimator.ofFloat(mSelfAvatar, "alpha", 1.0f, 0.0f);
         selfAvatarAnimator.setDuration(333);
-        ObjectAnimator matchStartAnimator = ObjectAnimator.ofFloat(mStarView,"alpha",1.0f,0.0f);
+        ObjectAnimator matchStartAnimator = ObjectAnimator.ofFloat(mStarView, "alpha", 1.0f, 0.0f);
         matchStartAnimator.setDuration(333);
-        ObjectAnimator attractiveprogressviewanimator = ObjectAnimator.ofFloat(mAttractiveProgressView,"alpha",1.0f,0.0f);
+        ObjectAnimator attractiveprogressviewanimator = ObjectAnimator.ofFloat(mAttractiveProgressView, "alpha", 1.0f, 0.0f);
         attractiveprogressviewanimator.setDuration(200);
-        ObjectAnimator ageprogressviewanimator = ObjectAnimator.ofFloat(mAgeProgressView,"alpha",1.0f,0.0f);
+        ObjectAnimator ageprogressviewanimator = ObjectAnimator.ofFloat(mAgeProgressView, "alpha", 1.0f, 0.0f);
         ageprogressviewanimator.setDuration(200);
-        ObjectAnimator charmprogressviewanimator = ObjectAnimator.ofFloat(mCharmProgressView,"alpha",1.0f,0.0f);
+        ObjectAnimator charmprogressviewanimator = ObjectAnimator.ofFloat(mCharmProgressView, "alpha", 1.0f, 0.0f);
         charmprogressviewanimator.setDuration(200);
         List<Animator> animators = new ArrayList<>();
         animators.add(selfAvatarAnimator);
@@ -1108,8 +1112,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             public void onTick(long millisUntilFinished) {
                 Calendar c = Calendar.getInstance();
-                mTime.setText((c.get(Calendar.HOUR_OF_DAY) >= 10 ? c.get(Calendar.HOUR_OF_DAY) : "0" + c.get(Calendar.HOUR_OF_DAY))+":" + (c.get(Calendar.MINUTE) >= 10 ? c.get(Calendar.MINUTE) : "0" + c.get(Calendar.MINUTE)));
+                mTime.setText((c.get(Calendar.HOUR_OF_DAY) >= 10 ? c.get(Calendar.HOUR_OF_DAY) : "0" + c.get(Calendar.HOUR_OF_DAY)) + ":" + (c.get(Calendar.MINUTE) >= 10 ? c.get(Calendar.MINUTE) : "0" + c.get(Calendar.MINUTE)));
             }
+
             public void onFinish() {
 
             }
@@ -1121,6 +1126,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     class BlurBackgourndTask extends Thread {
 
         Bitmap mBitmapBlur;
+
         @Override
         public void run() {
             super.run();
@@ -1136,12 +1142,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if(mBitmapBlur == null)
-                mBitmapBlur  = getBitmap(mFrameToBlur);
+                if (mBitmapBlur == null)
+                    mBitmapBlur = getBitmap(mFrameToBlur);
 
                 count++;
                 mHandler.removeMessages(HANDLER_RENDER_BLURBACKGROUND);
-                mHandler.sendMessage(mHandler.obtainMessage(HANDLER_RENDER_BLURBACKGROUND,BlurKit.getInstance().blur(mBitmapBlur,25)));
+                mHandler.sendMessage(mHandler.obtainMessage(HANDLER_RENDER_BLURBACKGROUND, BlurKit.getInstance().blur(mBitmapBlur, 25)));
 
             }
         }
@@ -1154,12 +1160,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mSelfAvatar.setImageURI("file://" + CAPTURECROPIMGPATH);
         BlurBackgourndTask blurBackgourndTask = new BlurBackgourndTask();
         blurBackgourndTask.start();
-        TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE,mCurrentGotFace.getPosition().x-288, Animation.ABSOLUTE,0, Animation.ABSOLUTE,mCurrentGotFace.getPosition().y-250,Animation.ABSOLUTE,0);
+        TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE, mCurrentGotFace.getPosition().x - 288, Animation.ABSOLUTE, 0, Animation.ABSOLUTE, mCurrentGotFace.getPosition().y - 250, Animation.ABSOLUTE, 0);
         transformation.setDuration(1000);
         transformation.setFillAfter(true);
         AnimationSet set = new AnimationSet(true);
         set.addAnimation(transformation);
-        ScaleAnimation scaleAnimation = new ScaleAnimation((float) (mCurrentGotFace.getWidth() / 504),1.0f,(float) (mCurrentGotFace.getHeight() / 496),1.0f);
+        ScaleAnimation scaleAnimation = new ScaleAnimation((float) (mCurrentGotFace.getWidth() / 504), 1.0f, (float) (mCurrentGotFace.getHeight() / 496), 1.0f);
         scaleAnimation.setDuration(1000);
         scaleAnimation.setFillAfter(true);
         set.addAnimation(scaleAnimation);
@@ -1174,7 +1180,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                        animationView.playAnimation();
+                animationView.playAnimation();
             }
 
             @Override
@@ -1188,7 +1194,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private String getFaceRect(Face face) {
         if (face != null) {
             StringBuilder builder = new StringBuilder("");
-            return  builder.append(face.getPosition().x).append(",").append(face.getPosition().y).append(",").append(face.getWidth()).append(",").append(face.getHeight()).toString();
+            return builder.append(face.getPosition().x).append(",").append(face.getPosition().y).append(",").append(face.getWidth()).append(",").append(face.getHeight()).toString();
         }
         return null;
     }
@@ -1221,7 +1227,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 buf.deleteCharAt(buf.length() - 1);
             }
             String mac = buf.toString();
-            return  mac;
+            return mac;
         }
 
         return "";
