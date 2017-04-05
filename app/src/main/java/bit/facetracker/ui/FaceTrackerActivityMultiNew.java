@@ -91,8 +91,6 @@ import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
 import bit.facetracker.job.FaceDetectorJob;
 import bit.facetracker.model.FaceDetectResult;
-import bit.facetracker.model.FaceModel;
-import bit.facetracker.tools.Blur;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.tools.ToastUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
@@ -244,7 +242,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     volatile FaceDetectResult mResult = null;
     volatile int mCurrentSuitsIndex = 0;
 
+    @BindView(R.id.activity_main)
+    View mMain;
+
     public synchronized void setResult(FaceDetectResult result) {
+
         this.mResult = result;
     }
 
@@ -262,8 +264,6 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
 
-
-        LogUtils.e("AndroidRuntime", "dpi =" + getResources().getDisplayMetrics().densityDpi);
 
         Display display = getWindowManager().getDefaultDisplay();
         mScreenWidth = display.getWidth();
@@ -318,6 +318,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(uiOptions);
+
+
 
         animationView.addAnimatorUpdateListener((animation -> {
 
@@ -451,6 +453,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         });
 
         startTimer();
+
+        // TEST
+        LogUtils.e("AndroidRuntime", "height = " + getResources().getDisplayMetrics().heightPixels);
+        LogUtils.e("AndroidRuntime", "width  = " + getResources().getDisplayMetrics().widthPixels);
+
 
     }
 
@@ -1231,6 +1238,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         }
 
         return "";
+    }
+
+    private void hideStatusBar() throws IOException, InterruptedException {
+        Process proc = Runtime.getRuntime().exec(new String[]{"su","-c","service call activity 79 s16 com.android.systemui"});
+        proc.waitFor();
     }
 
 }
