@@ -302,7 +302,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                     mBlurBackground.setBackground(new BitmapDrawable((Bitmap) msg.obj));
                 } else if (msg.what == HANDLER_STARTDISPLAY) {
-                    startDisplay();
+                    if(getResult() != null && getResult().result != null && getResult().result.fashion.suits.size() > 0) {
+                        startDisplay();
+                    }
                 } else if (msg.what == HANDLE_DISPLAYSUIT) {
 
                     if (getResult() != null && getResult().result != null && getResult().result.fashion.suits.size() > 0) {

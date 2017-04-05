@@ -120,7 +120,6 @@ public class TextContainer extends LinearLayout {
         public void onAnimationUpdate(ValueAnimator animation) {
 
             int start = (int) (((float) animation.getAnimatedValue() - timeoffset) / (PERCENT * timeoffset));
-
             for (int i = Math.min(count - 1, Math.max(start, 0)); i < count; i++) {
                 if ((float) animation.getAnimatedValue() <= (i * timeoffset * PERCENT + timeoffset) && getChildAt(i).getVisibility() == VISIBLE && ((FlashTextView) getChildAt(i)).getRectAlpha() > 0) {
                     int alpha = (int) ((1 - ((float) animation.getAnimatedValue() - i * timeoffset * PERCENT) / timeoffset) * 255);
