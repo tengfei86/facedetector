@@ -1034,18 +1034,27 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
 
         mSelfAvatar.setAlpha(1.0f);
+        mSelfAvatar.setImageURI("");
         mAttractiveProgressView.setAlpha(1.0f);
+        mAttractiveProgressView.setMaxProgress(0);
         mAttractiveProgressView.setTextVisible(true);
         mAgeProgressView.setAlpha(1.0f);
+        mAgeProgressView.setMaxProgress(0);
         mAgeProgressView.setTextVisible(true);
         mCharmProgressView.setAlpha(1.0f);
         mCharmProgressView.setTextVisible(true);
+        mCharmProgressView.setMaxProgress(0);
         mAttractiveTextContainer.setVisibility(View.VISIBLE);
+        mAttractiveTextContainer.setDisplayText("");
         mAgeTextContainer.setVisibility(View.VISIBLE);
+        mAgeTextContainer.setDisplayText("");
         mCharmTextContainer.setVisibility(View.VISIBLE);
+        mCharmTextContainer.setDisplayText("");
         mStarView.setAlpha(1.0f);
         mStarView.setVisibility(View.INVISIBLE);
+        mStarView.setImageURI("");
         mMatchStartTextContainer.setVisibility(View.VISIBLE);
+        mMatchStartTextContainer.setDisplayText("");
         mFirstResult.setVisibility(View.GONE);
         mSecondResult.setVisibility(View.GONE);
         mMainImage.setVisibility(View.INVISIBLE);

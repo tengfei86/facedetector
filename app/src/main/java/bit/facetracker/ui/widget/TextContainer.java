@@ -60,37 +60,36 @@ public class TextContainer extends LinearLayout {
                     view.setVisibility(View.INVISIBLE);
                 addView(view);
             }
-        }
+            ValueAnimator animator = ValueAnimator.ofFloat(0.0f, (float) (TIMEOFFSET * PERCENT * getChildCount() - 1) + TIMEOFFSET);
+            animator.setDuration(1500);
 
-        ValueAnimator animator = ValueAnimator.ofFloat(0.0f, (float) (TIMEOFFSET * PERCENT * getChildCount() - 1) + TIMEOFFSET);
-        animator.setDuration(1500);
+            CustomListAnimatorListener listAnimatorListener = new CustomListAnimatorListener(getChildCount(), TIMEOFFSET);
+            animator.addUpdateListener(listAnimatorListener);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
 
-        CustomListAnimatorListener listAnimatorListener = new CustomListAnimatorListener(getChildCount(), TIMEOFFSET);
-        animator.addUpdateListener(listAnimatorListener);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (getChildCount() > 0 && ((FlashTextView) getChildAt(getChildCount() - 1)).getRectAlpha() > 0) {
-                    ((FlashTextView) getChildAt(getChildCount() - 1)).setRectAlpha(0);
                 }
-            }
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (getChildCount() > 0 && ((FlashTextView) getChildAt(getChildCount() - 1)).getRectAlpha() > 0) {
+                        ((FlashTextView) getChildAt(getChildCount() - 1)).setRectAlpha(0);
+                    }
+                }
 
-            }
+                @Override
+                public void onAnimationCancel(Animator animation) {
 
-            @Override
-            public void onAnimationRepeat(Animator animation) {
+                }
 
-            }
-        });
-        animator.start();
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        }
 
     }
 
