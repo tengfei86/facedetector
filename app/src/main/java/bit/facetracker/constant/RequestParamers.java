@@ -15,4 +15,11 @@ public class RequestParamers {
          String FACERECT = "faceRect";
      }
 
+     public interface Weather {
+         String APPID = "appid";
+         String CITYID = "id";
+         String LANG = "lang";
+         String UNIT = "units";
+     }
+
 }

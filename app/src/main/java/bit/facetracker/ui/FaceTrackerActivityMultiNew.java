@@ -55,6 +55,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
@@ -89,8 +91,11 @@ import java.util.Map;
 
 import bit.facetracker.AndroidApplication;
 import bit.facetracker.R;
+import bit.facetracker.constant.Config;
 import bit.facetracker.job.FaceDetectorJob;
+import bit.facetracker.job.WeatherInfoJob;
 import bit.facetracker.model.FaceDetectResult;
+import bit.facetracker.model.WeatherModel;
 import bit.facetracker.tools.LogUtils;
 import bit.facetracker.tools.ToastUtils;
 import bit.facetracker.ui.camera.CameraSourcePreview;
@@ -235,6 +240,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @BindView(R.id.blur_background)
     FrameLayout mBlurBackground;
 
+    @BindView(R.id.temperature)
+    TextView mWeatherInfo;
+
     volatile BitmapDrawable mBackgroundDrawable;
 
     AnimatorSet mSelfAvatarSet;
@@ -298,6 +306,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 } else if (msg.what == HANDLE_DISPLAYSUIT) {
 
                     if (getResult() != null && getResult().result != null && getResult().result.fashion.suits.size() > 0) {
+                        cleanMemoryCache();
                         mMainImage.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).url);
                         mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
                         mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
@@ -457,8 +466,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         // TEST
         LogUtils.e("AndroidRuntime", "height = " + getResources().getDisplayMetrics().heightPixels);
         LogUtils.e("AndroidRuntime", "width  = " + getResources().getDisplayMetrics().widthPixels);
-
-
+        getWeatherInfo();
     }
 
     /**
@@ -987,6 +995,18 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
     }
 
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WeatherModel result) {
+        if (result != null) {
+            mWeatherInfo.setText(result.main.temp + "℃");
+        } else {
+            ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
+        }
+
+    }
+
     class FaceContainer {
 
         FaceContainer(Face face) {
@@ -1045,6 +1065,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mHandler.removeMessages(HANDLER_STARTDISPLAY);
         mCurrentSuitsIndex = 0;
         setResult(null);
+        cleanMemoryCache();
 
     }
 
@@ -1243,6 +1264,17 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private void hideStatusBar() throws IOException, InterruptedException {
         Process proc = Runtime.getRuntime().exec(new String[]{"su","-c","service call activity 79 s16 com.android.systemui"});
         proc.waitFor();
+    }
+
+    private void cleanMemoryCache() {
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        imagePipeline.clearMemoryCaches();
+    }
+
+
+    private void getWeatherInfo() {
+        WeatherInfoJob job = new WeatherInfoJob(Config.SHIJIAZHUANGID);
+        AndroidApplication.getInstance().getJobManager().addJob(job);
     }
 
 }
