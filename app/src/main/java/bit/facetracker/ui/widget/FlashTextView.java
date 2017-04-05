@@ -44,7 +44,7 @@ public class FlashTextView extends android.support.v7.widget.AppCompatTextView {
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.density = context.getResources().getDisplayMetrics().density;
         mTextPaint.setStyle(Paint.Style.FILL);
-        mTextPaint.setTextSize(getTextSize());
+        mTextPaint.setTextSize(60);
         mTextPaint.setColor(Color.WHITE);
         mRectPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mRectPaint.setColor(Color.WHITE);
