@@ -177,7 +177,7 @@
 
         <bit.facetracker.ui.widget.TextContainer
             android:id="@+id/matchstart_textcontainer"
-            android:layout_width="wrap_content"
+            android:layout_width="500px"
             android:layout_height="match_parent"
             android:layout_below="@id/match_star"
             android:layout_marginLeft="288px"
