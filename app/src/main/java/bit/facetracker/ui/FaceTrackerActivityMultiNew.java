@@ -943,7 +943,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         @Override
         protected void onPostExecute(String file) {
             super.onPostExecute(file);
-            detectorface(file, getMacAddress(), getFaceRect(mCurrentGotFace));
+            detectorface(file, getFaceRect(mCurrentGotFace),getMacAddress());
         }
 
 
