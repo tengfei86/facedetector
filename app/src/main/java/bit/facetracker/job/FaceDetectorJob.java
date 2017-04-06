@@ -1,6 +1,7 @@
 package bit.facetracker.job;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.birbit.android.jobqueue.RetryConstraint;
 
@@ -43,8 +44,9 @@ public class FaceDetectorJob extends BaseJob {
         params.put(RequestParamers.FaceDetector.FACILITYID,facilityId);
         params.put(RequestParamers.FaceDetector.FACERECT,faceRect);
         String result = HttpUtils.getInstance().requestContainsFile(URL.FACEDETECTORURL, null, params, "image", file);
-        FaceDetectResult resultObj = GsonUtils.fromJson(result, FaceDetectResult.class);
-        if (resultObj != null) {
+        FaceDetectResult resultObj = null;
+        if (!TextUtils.isEmpty(result)) {
+            resultObj = GsonUtils.fromJson(result, FaceDetectResult.class);
             EventBus.getDefault().post(resultObj);
             LogUtils.d("FaceDetecor", "result = "  + result);
         } else {
