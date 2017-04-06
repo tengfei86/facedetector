@@ -988,11 +988,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
             } else {
-                ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
+                ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
             }
 
         } else {
-            ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
+            ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
         }
 
     }
@@ -1002,9 +1002,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WeatherModel result) {
         if (result != null) {
-            mWeatherInfo.setText(result.main.temp + "℃");
+            mWeatherInfo.setText((int)result.main.temp + "℃");
         } else {
-            ToastUtils.showLong(this, "没毛病 ！ O(∩_∩)O ");
+            ToastUtils.showLong(this, "Hi,GFW 干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
         }
 
     }
