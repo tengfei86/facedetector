@@ -120,19 +120,21 @@ public class TextContainer extends LinearLayout {
         public void onAnimationUpdate(ValueAnimator animation) {
 
             int start = (int) (((float) animation.getAnimatedValue() - timeoffset) / (PERCENT * timeoffset));
-            for (int i = Math.min(count - 1, Math.max(start, 0)); i < count; i++) {
-                if ((float) animation.getAnimatedValue() <= (i * timeoffset * PERCENT + timeoffset) && getChildAt(i).getVisibility() == VISIBLE && ((FlashTextView) getChildAt(i)).getRectAlpha() > 0) {
-                    int alpha = (int) ((1 - ((float) animation.getAnimatedValue() - i * timeoffset * PERCENT) / timeoffset) * 255);
+            for (int i = Math.min(getChildCount() - 1, Math.max(start, 0)); i < getChildCount(); i++) {
+                if (getChildAt(i) != null) {
+                    if ((float) animation.getAnimatedValue() <= (i * timeoffset * PERCENT + timeoffset) && getChildAt(i).getVisibility() == VISIBLE && ((FlashTextView) getChildAt(i)).getRectAlpha() > 0) {
+                        int alpha = (int) ((1 - ((float) animation.getAnimatedValue() - i * timeoffset * PERCENT) / timeoffset) * 255);
 
-                    int pre = i - 1;
-                    if (pre >= 0 && ((FlashTextView) getChildAt(pre)).getRectAlpha() > 0) {
-                        ((FlashTextView) getChildAt(pre)).setRectAlpha(0);
+                        int pre = i - 1;
+                        if (pre >= 0 && ((FlashTextView) getChildAt(pre)).getRectAlpha() > 0) {
+                            ((FlashTextView) getChildAt(pre)).setRectAlpha(0);
+                        }
+                        ((FlashTextView) getChildAt(i)).setRectAlpha(alpha);
                     }
-                    ((FlashTextView) getChildAt(i)).setRectAlpha(alpha);
-                }
-                if ((float) animation.getAnimatedValue() >= ((i * timeoffset * PERCENT))) {
-                    if (i < count) {
-                        getChildAt(i).setVisibility(VISIBLE);
+                    if ((float) animation.getAnimatedValue() >= ((i * timeoffset * PERCENT))) {
+                        if (i < count) {
+                            getChildAt(i).setVisibility(VISIBLE);
+                        }
                     }
                 }
             }
@@ -141,7 +143,7 @@ public class TextContainer extends LinearLayout {
     }
 
 
-    CountDownTimer time = new CountDownTimer(1000,5) {
+    CountDownTimer time = new CountDownTimer(1000, 5) {
 
         @Override
         public void onTick(long millisUntilFinished) {
