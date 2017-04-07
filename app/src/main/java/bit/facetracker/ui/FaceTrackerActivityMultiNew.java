@@ -311,9 +311,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         cleanMemoryCache();
                         mMainImage.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).url);
                         mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(0).url);
-                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
-                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(2).url);
-                        mSide1Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
+                        mSide2Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(1).url);
+                        mSide3Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(2).url);
+                        mSide4Image.setImageURI(getResult().result.fashion.suits.get(mCurrentSuitsIndex).items.get(3).url);
                     }
 
                     if (getResult() != null) {
