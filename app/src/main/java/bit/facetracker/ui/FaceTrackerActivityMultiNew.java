@@ -253,6 +253,9 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @BindView(R.id.activity_main)
     View mMain;
 
+    @BindView(R.id.weather_icon)
+    LottieAnimationView mWeacherIcon;
+
     public synchronized void setResult(FaceDetectResult result) {
 
         this.mResult = result;
@@ -1002,6 +1005,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WeatherModel result) {
         if (result != null) {
+            mWeacherIcon.setAnimation(result.weather.get(0).icon.substring(0,2) + ".json");
+            mWeacherIcon.playAnimation();
             mWeatherInfo.setText((int)result.main.temp + "℃");
         } else {
             ToastUtils.showLong(this, "Hi,GFW 干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");

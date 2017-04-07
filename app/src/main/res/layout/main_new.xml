@@ -49,12 +49,13 @@
             android:textStyle="bold"/>
 
         <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/weather_icon"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:layout_width="200px"
             android:layout_height="200px"
             android:background="@android:color/transparent"
-            app:lottie_fileName="weather_sun.json"
+            app:lottie_fileName="01.json"
             app:lottie_loop="true"
             app:lottie_autoPlay="true"
             />
