@@ -919,6 +919,30 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         h = bitmap.getHeight() - y;
                     }
 
+
+                    double fx = Math.max(0, mFace.getPosition().x - mFace.getWidth());
+                    double fy = Math.max(0, mFace.getPosition().y - 20);
+
+                    double fw = mFace.getWidth() * 3;
+                    double fh = mFace.getHeight() * 2;
+
+                    if (mFace.getPosition().x < 0) {
+                        fw += mFace.getPosition().x;
+                    }
+
+                    if ((fw + fx) > bitmap.getWidth()) {
+                        fw = bitmap.getWidth() - fx;
+                    }
+
+                    if (mFace.getPosition().y < 0) {
+                        fh += mFace.getPosition().y;
+                    }
+
+                    if ((fh + fy) > bitmap.getHeight()) {
+                        fh = bitmap.getHeight() - fy;
+                    }
+
+
                     final Bitmap disbitmap = Bitmap.createBitmap(bitmap, (int) x, (int) y, (int) w, (int) h);
                     File dir = new File(CAPTUREPATHDIR);
                     if (!dir.exists()) {
@@ -936,17 +960,21 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         e.printStackTrace();
                     }
 
-
+                    final Bitmap disfullbitmap = Bitmap.createBitmap(bitmap, (int) fx, (int) fy, (int) fw, (int) fh);
                     file = new File(filefullpath);
                     try {
                         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                        disfullbitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         outputStream.close();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+                    disbitmap.recycle();
+                    disfullbitmap.recycle();
+                    bitmap.recycle();
 
                 }
             }

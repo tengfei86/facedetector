@@ -61,7 +61,7 @@ public class TextContainer extends LinearLayout {
                 addView(view);
             }
             ValueAnimator animator = ValueAnimator.ofFloat(0.0f, (float) (TIMEOFFSET * PERCENT * getChildCount() - 1) + TIMEOFFSET);
-            animator.setDuration(500 * text.length());
+            animator.setDuration(Math.min(500 * text.length(),2000));
 
             CustomListAnimatorListener listAnimatorListener = new CustomListAnimatorListener(getChildCount(), TIMEOFFSET);
             animator.addUpdateListener(listAnimatorListener);
