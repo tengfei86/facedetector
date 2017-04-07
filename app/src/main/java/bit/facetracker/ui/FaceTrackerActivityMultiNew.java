@@ -920,10 +920,10 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     }
 
 
-                    double fx = Math.max(0, mFace.getPosition().x - mFace.getWidth());
+                    double fx = Math.max(0, mFace.getPosition().x - mFace.getWidth() / 2);
                     double fy = Math.max(0, mFace.getPosition().y - 20);
 
-                    double fw = mFace.getWidth() * 3;
+                    double fw = mFace.getWidth() * 2;
                     double fh = mFace.getHeight() * 2;
 
                     if (mFace.getPosition().x < 0) {
