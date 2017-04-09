@@ -811,12 +811,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
             if (mIsGetBitmap) {
-                runOnUiThread(new Runnable() {
+                mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         init();
                     }
-                });
+                },30000);
             }
 
         }
@@ -920,11 +920,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                     }
 
 
-                    double fx = Math.max(0, mFace.getPosition().x - mFace.getWidth() / 2);
-                    double fy = Math.max(0, mFace.getPosition().y - 20);
+                    double fx = Math.max(0, mFace.getPosition().x - mFace.getWidth() * 0.25);
+                    double fy = Math.max(0, mFace.getPosition().y);
 
-                    double fw = mFace.getWidth() * 2;
-                    double fh = mFace.getHeight() * 2;
+                    double fw = mFace.getWidth() * 1.5;
+                    double fh = mFace.getHeight() * 3;
 
                     if (mFace.getPosition().x < 0) {
                         fw += mFace.getPosition().x;
@@ -1266,7 +1266,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private String getFaceRect(Face face) {
         if (face != null) {
             StringBuilder builder = new StringBuilder("");
-            return builder.append(face.getPosition().x).append(",").append(face.getPosition().y).append(",").append(face.getWidth()).append(",").append(face.getHeight()).toString();
+            return builder.append(face.getWidth() * 0.25).append(",").append(0.0).append(",").append(face.getWidth()).append(",").append(face.getHeight()).toString();
         }
         return null;
     }
