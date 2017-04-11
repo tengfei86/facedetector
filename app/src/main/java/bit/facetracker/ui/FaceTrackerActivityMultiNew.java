@@ -145,6 +145,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     private static final Integer HANDLER_RENDER_BLURBACKGROUND = 1;
     private static final Integer HANDLER_STARTDISPLAY = 2;
     private static final Integer HANDLE_DISPLAYSUIT = 3;
+    private static final Integer HANDLE_MISSING = 4;
 
     public Map<Integer, FaceContainer> mDetectedFaces = new HashMap<>();
 
@@ -323,6 +324,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                         mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
                         mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
                     }
+                } else if (msg.what == HANDLE_MISSING) {
+                    init();
                 }
             }
         };
@@ -548,7 +551,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1280, 720)
                 .setAutoFocusEnabled(true)
-                .setFacing(0)
+                .setFacing(1)
                 .setRequestedFps(20.0f)
                 .build();
 
@@ -755,16 +758,14 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 float lastX = 0f;
                 float lastY = 0f;
 
+
+
                 mFace = mDetectedFaces.get(face.getId()).face;
 
                 if (mFace != null) {
                     lastX = (float) (mFace.getPosition().x + mFace.getWidth() / 2.0);
                     lastY = (float) (mFace.getPosition().y + mFace.getHeight() / 2.0);
                 }
-
-//                if(mFace != null) {
-//                    LogUtils.d("Count","offsetx = " + Math.abs(mFace.getPosition().x - face.getPosition().x) + "offsetY = " + Math.abs(mFace.getPosition().y - face.getPosition().y));
-//                }
 
                 if (Math.abs(currentX - lastX) <= MAXOFFSET_X && Math.abs(currentY - lastY) <= MAXOFFSET_Y && !mIsGetBitmap && mFace != null) {
                     mDetectedFaces.get(face.getId()).count++;
@@ -777,7 +778,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                 if (mDetectedFaces.get(face.getId()).count >= MAXSHOTCOUNT) {
 
-                    mCurrentGotFace = face;
+                    mCurrentGotFace = mFace;
                     mIsGetBitmap = true;
                     CAPTURECROPIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "capture.png";
                     CAPTUREIMGPATH = CAPTUREPATHDIR + System.currentTimeMillis() + "_" + "full" + "_" + "capture.png";
@@ -811,12 +812,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         public void onDone() {
             mOverlay.remove(mFaceGraphic);
             if (mIsGetBitmap) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        init();
-                    }
-                },30000);
+                mHandler.removeMessages(HANDLE_MISSING);
+                mHandler.sendEmptyMessageDelayed(HANDLE_MISSING, 30000);
             }
 
         }
@@ -1003,7 +1000,8 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);
 
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
+        // advisement
+        matrix.postRotate(-90);
         Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         return disbitmap;
@@ -1019,11 +1017,11 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
             } else {
-                ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
+                ToastUtils.showLong(this, " O(∩_∩)O ");
             }
 
         } else {
-            ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
+//            ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
         }
 
     }
@@ -1037,7 +1035,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
             mWeacherIcon.playAnimation();
             mWeatherInfo.setText((int)result.main.temp + "℃");
         } else {
-            ToastUtils.showLong(this, "Hi,GFW 干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
+//            ToastUtils.showLong(this, "Hi,GFW 干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
         }
 
     }
