@@ -322,7 +322,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
                     if (getResult() != null) {
                         mCurrentSuitsIndex = ++mCurrentSuitsIndex % getResult().result.fashion.suits.size();
-                        mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 3000);
+                        mHandler.sendEmptyMessageDelayed(HANDLE_DISPLAYSUIT, 6000);
                     }
                 } else if (msg.what == HANDLE_MISSING) {
                     init();
@@ -551,7 +551,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1280, 720)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
+                .setFacing(0)
                 .setRequestedFps(20.0f)
                 .build();
 
@@ -1001,7 +1001,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
 
         Matrix matrix = new Matrix();
         // advisement
-        matrix.postRotate(-90);
+        matrix.postRotate(90);
         Bitmap disbitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         return disbitmap;
