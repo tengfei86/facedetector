@@ -551,7 +551,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mCameraSource = new CameraSource.Builder(context, myFaceDetector)
                 .setRequestedPreviewSize(1280, 720)
                 .setAutoFocusEnabled(true)
-                .setFacing(1)
+                .setFacing(CameraSource.CAMERA_FACING_FRONT)
                 .setRequestedFps(20.0f)
                 .build();
 
@@ -1017,11 +1017,13 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
                 mIsGetDetectResult = true;
                 mFaceGraphic.setScanBody(mIsGetDetectResult);
             } else {
+                init();
                 ToastUtils.showLong(this, " O(∩_∩)O ");
             }
 
         } else {
-//            ToastUtils.showLong(this, "干嘛呢，正在演示呢，正经点 ！ O(∩_∩)O ");
+            init();
+            ToastUtils.showLong(this, " ！ O(∩_∩)O  !");
         }
 
     }
@@ -1031,6 +1033,7 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WeatherModel result) {
         if (result != null) {
+            mWeacherIcon.cancelAnimation();
             mWeacherIcon.setAnimation(result.weather.get(0).icon.substring(0,2) + ".json");
             mWeacherIcon.playAnimation();
             mWeatherInfo.setText((int)result.main.temp + "℃");
@@ -1230,6 +1233,12 @@ public final class FaceTrackerActivityMultiNew extends BaseActivity {
         mSelfAvatar.setImageURI("file://" + CAPTURECROPIMGPATH);
         BlurBackgourndTask blurBackgourndTask = new BlurBackgourndTask();
         blurBackgourndTask.start();
+
+        LogUtils.d("Position"," x  = " + (mCurrentGotFace.getPosition().x));
+        LogUtils.d("Position"," y  = " + (mCurrentGotFace.getPosition().y));
+//        LogUtils.d("Position"," x  = " + (mCurrentGotFace.getPosition().x - 288));
+//        LogUtils.d("Position"," y  = " + (mCurrentGotFace.getPosition().y - 250));
+
         TranslateAnimation transformation = new TranslateAnimation(Animation.ABSOLUTE, mCurrentGotFace.getPosition().x - 288, Animation.ABSOLUTE, 0, Animation.ABSOLUTE, mCurrentGotFace.getPosition().y - 250, Animation.ABSOLUTE, 0);
         transformation.setDuration(1000);
         transformation.setFillAfter(true);

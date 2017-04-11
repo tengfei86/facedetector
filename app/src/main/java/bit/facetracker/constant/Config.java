@@ -6,6 +6,9 @@ package bit.facetracker.constant;
 
 public class Config {
     public static final String OPENWEATHER_APIKEY = "3712fab046ec685f1717b7c86eb65d25";
-    public static final String SHIJIAZHUANGID = "1795269";
+    // shijiazhuang
+    //public static final String SHIJIAZHUANGID = "1795269";
+    // beijing
+    public static final String SHIJIAZHUANGID = "1816670";
     public static final String WEATHER_METRICUNIT = "metric";
 }
