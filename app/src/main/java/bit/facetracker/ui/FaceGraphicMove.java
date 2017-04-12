@@ -38,7 +38,7 @@ public class FaceGraphicMove extends GraphicOverlay.Graphic {
     private volatile float progress = 0.0f;
     private float rectBand = 10.0f;
     private float OFFSET = (float) (1.0 / 8);
-    private int mLoopCount = 2;
+    private int mLoopCount = 3;
     private static final int COLOR_CHOICES[] = {
             Color.BLUE,
             Color.CYAN,
